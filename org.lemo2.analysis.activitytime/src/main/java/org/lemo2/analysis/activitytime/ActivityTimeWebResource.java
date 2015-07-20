@@ -17,6 +17,7 @@ import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
@@ -32,8 +33,10 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import org.lemo2.Authentication.UserPrincipal;
 import org.lemo2.analysis.activitytime.returntypes.ActivityTimeResult;
 import org.lemo2.analysis.activitytime.returntypes.ResultListHashMapObject;
 import org.lemo2.analysis.activitytime.returntypes.ResultListLongObject;
@@ -57,6 +60,14 @@ public class ActivityTimeWebResource implements WebResource{
 	
 	private static final Logger logger = LoggerFactory.getLogger(ActivityTimeWebResource.class);
 	private double intervall;
+	
+    @GET
+    @Path("info")
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserPrincipal showUserInfo() {
+        final UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        return userPrincipal;
+    }
 	
 	@GET
 	@PermitAll

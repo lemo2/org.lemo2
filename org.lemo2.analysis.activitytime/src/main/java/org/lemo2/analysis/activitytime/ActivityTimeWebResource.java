@@ -52,6 +52,9 @@ public class ActivityTimeWebResource implements WebResource{
 	@Requires
 	private DataProvider dataProvider;
 	
+    @Context
+    private SecurityContext securityContext;
+	
 	private static final Logger logger = LoggerFactory.getLogger(ActivityTimeWebResource.class);
 	private double intervall;
 	

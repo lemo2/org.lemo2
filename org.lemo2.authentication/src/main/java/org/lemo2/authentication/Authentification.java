@@ -1,4 +1,4 @@
-package org.lemo2.Authentication;
+package org.lemo2.authentication;
 
 import java.io.IOException;
 import java.security.Principal;

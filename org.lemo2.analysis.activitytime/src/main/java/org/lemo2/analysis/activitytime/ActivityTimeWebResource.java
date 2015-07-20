@@ -36,7 +36,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
-import org.lemo2.Authentication.UserPrincipal;
+import org.lemo2.authentication.UserPrincipal;
 import org.lemo2.analysis.activitytime.returntypes.ActivityTimeResult;
 import org.lemo2.analysis.activitytime.returntypes.ResultListHashMapObject;
 import org.lemo2.analysis.activitytime.returntypes.ResultListLongObject;

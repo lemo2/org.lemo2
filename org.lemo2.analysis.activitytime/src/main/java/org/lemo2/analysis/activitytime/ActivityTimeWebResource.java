@@ -1,6 +1,7 @@
 package org.lemo2.analysis.activitytime;
 
 import java.io.ByteArrayOutputStream;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -26,6 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.SecurityContext;
 
 import org.lemo2.analysis.activitytime.returntypes.ActivityTimeResult;
 import org.lemo2.analysis.activitytime.returntypes.ResultListHashMapObject;
@@ -49,9 +56,13 @@ public class ActivityTimeWebResource implements WebResource{
 	private double intervall;
 	
 	@GET
-//	@Produces(MediaType.APPLICATION_JSON)
-//	@Produces("application/json")
-	public String getResult(){
+	@PermitAll
+	public String getResult(@Context SecurityContext securityContext){
+		Principal principal = securityContext.getUserPrincipal(); 
+		logger.info("Principal: "+ principal);
+//		for (String header : securityContext.getRequestHeaders().keySet()) {
+//			logger.info("This header was set: " + header);
+//		}
 		String json = "";
 		String xml = "";
 		Long startDate = 1434025148950L;

@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.felix.ipojo.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

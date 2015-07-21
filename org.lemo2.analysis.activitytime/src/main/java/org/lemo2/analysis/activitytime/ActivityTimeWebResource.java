@@ -36,7 +36,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
-import org.lemo2.authentication.UserPrincipal;
+
 import org.lemo2.analysis.activitytime.returntypes.ActivityTimeResult;
 import org.lemo2.analysis.activitytime.returntypes.ResultListHashMapObject;
 import org.lemo2.analysis.activitytime.returntypes.ResultListLongObject;
@@ -54,22 +54,17 @@ public class ActivityTimeWebResource implements WebResource{
 
 	@Requires
 	private DataProvider dataProvider;
-	
-    @Context
-    private SecurityContext securityContext;
-	
+		
 	private static final Logger logger = LoggerFactory.getLogger(ActivityTimeWebResource.class);
 	private double intervall;
 	
     @GET
-    @Path("info")
     @Produces(MediaType.APPLICATION_JSON)
-    public UserPrincipal showUserInfo() {
-        final UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
-        return userPrincipal;
+    public Principal showUserInfo(@Context SecurityContext securityContext) {
+         Principal principal = securityContext.getUserPrincipal();
+         return principal;
     }
 	
-	@GET
 	@PermitAll
 	public String getResult(@Context SecurityContext securityContext){
 		Principal principal = securityContext.getUserPrincipal(); 

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 class ResourceHttpContext implements HttpContext {
 
-	private static final Logger logger = LoggerFactory.getLogger(RestResourceAdapter.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResourceHttpContext.class);
 
 	private BundleContext context;
 

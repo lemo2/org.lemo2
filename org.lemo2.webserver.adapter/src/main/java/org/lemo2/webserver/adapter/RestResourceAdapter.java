@@ -139,7 +139,7 @@ public class RestResourceAdapter {
 
 		// security
 		resourceConfig.register(RolesAllowedDynamicFeature.class);
-		resourceConfig.packages("org.lemo2.webserver.adapter.auth");
+		resourceConfig.packages("org.lemo2.authentication");
 		resourceConfig.registerInstances(new PluginListening(this));
 
 		for (WebResource resourceInstance : resourceInstances) {

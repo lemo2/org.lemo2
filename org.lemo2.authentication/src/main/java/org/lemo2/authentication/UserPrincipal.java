@@ -17,6 +17,12 @@ public class UserPrincipal implements Principal {
 
     public int getAccessLevel() { return accessLevel; }
 
+    public UserPrincipal() {
+        this.name = "name";
+        this.role = "role";
+        this.accessLevel = 0;
+    }
+    
     public UserPrincipal(String name, String role, int accessLevel) {
         this.name = name;
         this.role = role;

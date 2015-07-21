@@ -131,7 +131,7 @@ public class WebappConfig {
 				properties.get("lemo.tool.name") == null ||
 				properties.get("lemo.tool.description.short") == null ){
 			
-			logger.equals("Metadata of analysis " + analyticsTool.getClass().getName() + " is incomplete.");
+			logger.error("Metadata of analysis " + analyticsTool.getClass().getName() + " is incomplete.");
 			return;
 		}			
 		analyticsTools.put(analyticsTool, properties);

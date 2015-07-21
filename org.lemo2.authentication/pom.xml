@@ -48,9 +48,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>
-							org.lemo2.authentication; version="1.0.0",
-						</Export-Package>
+						<Import-Package>
+							*
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

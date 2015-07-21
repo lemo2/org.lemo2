@@ -36,7 +36,8 @@ public class Authentification implements ContainerRequestFilter {
 		final String role = "tester";
 		final int accessLevel = 5;
 
-		if(containerRequestContext.getUriInfo().getPath().equals("/user/badinfo")) {
+		logger.info("Requested URI: " + containerRequestContext.getUriInfo().getPath().toString());
+		if(containerRequestContext.getUriInfo().getPath().equals("tools/activitytime/")) {
 			containerRequestContext.abortWith(
 					Response.status(Response.Status.UNAUTHORIZED)
 					.entity("User is not authorized!")

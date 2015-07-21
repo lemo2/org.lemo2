@@ -60,9 +60,9 @@ public class ActivityTimeWebResource implements WebResource{
 	
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Principal showUserInfo(@Context SecurityContext securityContext) {
+    public String showUserInfo(@Context SecurityContext securityContext) {
          Principal principal = securityContext.getUserPrincipal();
-         return principal;
+         return principal.getName();
     }
 	
 	@PermitAll

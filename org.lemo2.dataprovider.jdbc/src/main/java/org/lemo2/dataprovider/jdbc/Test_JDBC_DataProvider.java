@@ -1,8 +1,8 @@
-package org.lemo2.persistence.dataprovider.jdbc;
+package org.lemo2.dataprovider.jdbc;
 
 import java.util.*;
 
-import org.lemo2.persistence.dataprovider.*;
+import org.lemo2.dataprovider.api.*;
 
 public class Test_JDBC_DataProvider {
 	

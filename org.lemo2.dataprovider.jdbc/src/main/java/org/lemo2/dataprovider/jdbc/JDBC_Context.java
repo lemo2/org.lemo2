@@ -1,6 +1,6 @@
-package org.lemo2.persistence.dataprovider.jdbc;
+package org.lemo2.dataprovider.jdbc;
 
-import org.lemo2.persistence.dataprovider.*;
+import org.lemo2.dataprovider.api.*;
 
 import java.sql.ResultSet;
 import java.util.*;

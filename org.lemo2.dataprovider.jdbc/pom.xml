@@ -8,11 +8,11 @@
 		<version>0.2.0-SNAPSHOT</version>
 	</parent>
   
-  <artifactId>org.lemo2.persistence.dataprovider</artifactId>
+  <artifactId>org.lemo2.dataprovider.jdbc</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   
-  	<name>Lemo jpa persistence provider.</name>
+  	<name>Lemo jdbc dataprovider.</name>
   	
   	<properties>
 
@@ -23,6 +23,12 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.lemo2</groupId>
+			<artifactId>org.lemo2.dataprovider.api</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -50,7 +56,7 @@
 					<configuration>
 						<instructions>
 							<Export-Package>
-								org.lemo2.persistence.dataprovider;version="0.1.0",
+								org.lemo2.dataprovider.jdbc;version="0.1.0",
 							</Export-Package>
 						</instructions>
 					</configuration>

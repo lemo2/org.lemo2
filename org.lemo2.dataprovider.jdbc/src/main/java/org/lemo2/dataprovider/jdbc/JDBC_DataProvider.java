@@ -1,4 +1,4 @@
-package org.lemo2.persistence.dataprovider.jdbc;
+package org.lemo2.dataprovider.jdbc;
 
 import java.util.*;
 import java.sql.Connection;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.mysql.jdbc.Driver;
 
-import org.lemo2.persistence.dataprovider.*;
+import org.lemo2.dataprovider.api.*;
 
 @Component
 @Instantiate

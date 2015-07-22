@@ -3,6 +3,7 @@ package org.lemo2.authentication;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Set;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -15,7 +16,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.DatatypeConverter;
 
-import org.apache.felix.ipojo.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +40,25 @@ public class Authentification implements ContainerRequestFilter {
 		final int accessLevel = 5;
 
 		logger.info("Requested URI: " + containerRequestContext.getUriInfo().getPath().toString());
-		if(containerRequestContext.getUriInfo().getPath().equals("tools/activitytime/")) {
-			containerRequestContext.abortWith(
-					Response.status(Response.Status.UNAUTHORIZED)
-					.entity("User is not authorized!")
-					.build());
-		}
-		
+
+
         MultivaluedMap<String, String> headers = containerRequestContext.getHeaders();
-        final String basicAuthentication = getBasicAuthentication(userName, "test");
-        headers.add("Authorization", basicAuthentication);
-        
-        
+        Set<String> keys = headers.keySet();
+        boolean authorized = false;
+        for(String key : keys){
+        	if(key.equals("Authorization")){
+        		authorized = true;
+        	}
+        }
+        if(authorized){
+            final String basicAuthentication = getBasicAuthentication(userName, "test");
+            headers.add("Authorization", basicAuthentication);        	
+        }else{  		
+    		containerRequestContext.abortWith(Response.serverError()
+    				.status(401)
+    				.header("WWW-Authenticate", "Basic realm=\"Test\"")
+    				.build());        	
+        }     
 		logger.info("Setting customSecurityContext");
 		containerRequestContext.setSecurityContext(new SecurityContext() {
 			@Override

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import org.lemo2.webapplication.api.AnalyticsTool;
 
-@Component
+@Component(immediate=true)
 @Provides
 @Instantiate
 public class ActivityTimeAnalysis implements AnalyticsTool {

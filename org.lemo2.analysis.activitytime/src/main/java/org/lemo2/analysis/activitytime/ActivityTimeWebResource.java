@@ -57,18 +57,12 @@ public class ActivityTimeWebResource implements WebResource{
 		
 	private static final Logger logger = LoggerFactory.getLogger(ActivityTimeWebResource.class);
 	private double intervall;
-	
+		
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String showUserInfo(@Context SecurityContext securityContext) {
-         Principal principal = securityContext.getUserPrincipal();
-         return principal.getName();
-    }
-	
 	@PermitAll
 	public String getResult(@Context SecurityContext securityContext){
 		Principal principal = securityContext.getUserPrincipal(); 
-		logger.info("Principal: "+ principal);
+		logger.info("Principal name: "+ principal.getName());
 //		for (String header : securityContext.getRequestHeaders().keySet()) {
 //			logger.info("This header was set: " + header);
 //		}

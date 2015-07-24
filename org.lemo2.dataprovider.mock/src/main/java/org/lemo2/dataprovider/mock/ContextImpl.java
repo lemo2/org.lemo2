@@ -25,25 +25,25 @@ public class ContextImpl implements LA_Context {
 		LA_Person person = new PersonImpl();
 		LA_Person person2 = new PersonImpl();
 		
-		ActivityImpl activity = new ActivityImpl(1434025149950L);
+		ActivityImpl activity = new ActivityImpl(1434025149L);
 		activity.addObject(object);
 		activity.addContext(this);
 		activity.addPerson(person);
 		activities.add(activity);
 		
-		activity = new ActivityImpl(1434025149940L);
+		activity = new ActivityImpl(1434125149L);
 		activity.addObject(object);
 		activity.addContext(this);
 		activity.addPerson(person);
 		activities.add(activity);
 		
-		activity = new ActivityImpl(1434025149930L);
+		activity = new ActivityImpl(1434225149L);
 		activity.addObject(object);
 		activity.addContext(this);
 		activity.addPerson(person2);
 		activities.add(activity);
 		
-		activity = new ActivityImpl(1434025149030L);
+		activity = new ActivityImpl(1434425149L);
 		activity.addObject(object);
 		activity.addContext(this);
 		activity.addPerson(person2);

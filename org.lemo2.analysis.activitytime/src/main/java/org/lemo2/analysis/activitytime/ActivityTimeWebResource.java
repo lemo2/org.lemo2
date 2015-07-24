@@ -54,15 +54,16 @@ public class ActivityTimeWebResource implements WebResource{
 	public String getResult(){
 		String json = "";
 		String xml = "";
-		Long startDate = 1434025148950L;
-
-		Long startDate2 = new Long(1432001445);
-		Long endDate2 = new Long(1432091445);
-		ResultListHashMapObject resultListHashMap = computeActivities(Arrays.asList(1L),null,startDate2,
-				endDate2,1000L,Arrays.asList("test"),Arrays.asList(1L,2L),null);
+//		Long startDate = 1434005149L; Dates for mock.
+//		Long endDate = 1434525149L;
+	
+		Long startDate = 1434005149L;
+		Long endDate = 1434525149L;
+		ResultListHashMapObject resultListHashMap = computeActivities(Arrays.asList(1L),null,startDate,
+				endDate,100L,Arrays.asList("test"),Arrays.asList(1L,2L),null);
 		
 		
-		ActivityTimeResult result = new ActivityTimeResult(resultListHashMap, startDate, intervall);
+		ActivityTimeResult result = new ActivityTimeResult(resultListHashMap, startDate*1000, intervall*1000);
 		try {
 			JAXBContext jc = JAXBContext.newInstance(ActivityTimeResult.class);
 			Marshaller m = jc.createMarshaller();
@@ -165,6 +166,9 @@ public class ActivityTimeWebResource implements WebResource{
 			double intervall) {
 
 		LA_Context context = getDemoContext();
+		context.getObjects();
+		context.getStudents();
+		context.getInstructors();
 		
 		for (LA_Activity activity : context.getActivities())
 		{

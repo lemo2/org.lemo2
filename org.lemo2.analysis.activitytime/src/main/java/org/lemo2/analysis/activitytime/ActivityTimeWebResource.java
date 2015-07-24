@@ -56,11 +56,12 @@ public class ActivityTimeWebResource implements WebResource{
 		String xml = "";
 //		Long startDate = 1434005149L; Dates for mock.
 //		Long endDate = 1434525149L;
-	
-		Long startDate = 1434005149L;
-		Long endDate = 1434525149L;
+
+		Long startDate = 1411070000L;
+		Long endDate = 1427970000L;
+		String[] learningTypes = {"Q​u​i​z","Forum"};
 		ResultListHashMapObject resultListHashMap = computeActivities(Arrays.asList(1L),null,startDate,
-				endDate,100L,Arrays.asList("test"),Arrays.asList(1L,2L),null);
+				endDate,100L,Arrays.asList(learningTypes),Arrays.asList(1L,2L),null);
 		
 		
 		ActivityTimeResult result = new ActivityTimeResult(resultListHashMap, startDate*1000, intervall*1000);
@@ -166,15 +167,12 @@ public class ActivityTimeWebResource implements WebResource{
 			double intervall) {
 
 		LA_Context context = getDemoContext();
-		context.getObjects();
-		context.getStudents();
-		context.getInstructors();
 		
 		for (LA_Activity activity : context.getActivities())
 		{
-			logger.info("Activity: "+ activity.getObject()+ " at "+activity.getTime()+ " added.");
+			logger.info("Activity: "+ activity.getObject().getType()+ " at "+activity.getTime()+ " added.");
 			if(activity.getObject()!=null && activity.getPerson()!=null){
-			boolean isInRT = false;
+			boolean isInRT = false; 
 			if ((resourceTypes != null) && (resourceTypes.size() > 0) && resourceTypes.contains(activity.getObject().getType()))
 			{
 				isInRT = true;

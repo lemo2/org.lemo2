@@ -160,6 +160,10 @@ public class JDBC_Context implements LA_Context {
 		if ( JDBC_DataProvider.DEBUG ) {
 			timing1 = System.currentTimeMillis();
 		}
+		//lazy initializing of persons and objects.
+		this.getInstructors();
+		this.getStudents();
+		this.getObjects();
 		_initActivities = true;
 		_activities = new ArrayList<LA_Activity>();
 		Set<Long> ids = new HashSet<Long>();

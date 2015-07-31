@@ -1,6 +1,6 @@
     (function(d3custom, $, undefined) {
     	var ajaxReturnData;
-        $.ajax({url: "http://localhost:8080/lemo/tools/activitytime/",async:false, success: function(result){
+        $.ajax({url: "/lemo/tools/activitytime/",async:false, success: function(result){
 			removedObjectNames = result.replace(/({"item":)(\[[0-9]+,[0-9]+\])(})/g, '$2');
         	var json = JSON.parse(removedObjectNames);
 			ajaxReturnData = json.activityTimeResult.data;

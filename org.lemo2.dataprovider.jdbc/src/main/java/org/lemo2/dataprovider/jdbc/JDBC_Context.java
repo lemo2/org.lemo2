@@ -156,6 +156,7 @@ public class JDBC_Context implements LA_Context {
 	
 	public List<LA_Activity> getActivities() {
 		if ( _initActivities ) return _activities;
+		getStudents();
 		long timing1, timing2;
 		if ( JDBC_DataProvider.DEBUG ) {
 			timing1 = System.currentTimeMillis();

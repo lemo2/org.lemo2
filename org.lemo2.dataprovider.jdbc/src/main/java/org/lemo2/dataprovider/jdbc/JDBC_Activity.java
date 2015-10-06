@@ -2,7 +2,6 @@ package org.lemo2.dataprovider.jdbc;
 
 import org.lemo2.dataprovider.api.*;
 
-import java.sql.ResultSet;
 import java.util.*;
 
 public class JDBC_Activity implements LA_Activity {
@@ -12,31 +11,37 @@ public class JDBC_Activity implements LA_Activity {
 	 */
 	static Map<Long,JDBC_Activity> ACTIVITIES = new HashMap<Long,JDBC_Activity>();
 		
-	private long _time;
-	private String _action = null;
-	private String _info = null;
-	private LA_Activity _reference = null;	
-	private Map<String,String> _extAttributes = null;
-	private LA_Person _person = null;
-	private LA_Object _object = null;
+	long _time;
+	String _action = null;
+	String _info = null;
+	LA_Activity _reference = null;	
+	Map<String,String> _extAttr = null;
+	LA_Context _context = null;
+	LA_Person _person = null;
+	LA_Object _object = null;
 	
-	public JDBC_Activity(Long id, long time, LA_Person person, LA_Object object) {
+	public JDBC_Activity(Long id, long time, String action, String info,
+			Long activityId, Long contextId, Long personId, Long objectId) {
 		ACTIVITIES.put(id, this);
 		_time = time;
-		_person = person;
-		_object = object;
-	}
-
-	public Set<String> extAttributes() {
-		if ( _extAttributes == null ) return null;
-		return _extAttributes.keySet();
-	}
-	
-	public String getExtAttribute(String attr) {
-		if ( _extAttributes == null ) return null;
-		return _extAttributes.get(attr);
+		_action = action;
+		_info = info;
+		if ( activityId != null ) _reference = JDBC_Activity.findById(activityId);
+		if ( contextId != null ) _context = JDBC_Context.findById(contextId);
+		if ( personId != null ) _person = JDBC_Person.findById(personId);
+		if ( objectId != null ) _object = JDBC_Object.findById(objectId);
 	}
 	
+	public Set<String> getExtNames() {
+		if ( _extAttr == null ) return null;
+		return _extAttr.keySet();
+	}
+	
+	public String getExtValue(String name) {
+		if ( _extAttr == null ) return null;
+		return _extAttr.get(name);
+	}
+		
 	public long getTime() {
 		return _time;
 	}
@@ -59,79 +64,6 @@ public class JDBC_Activity implements LA_Activity {
 	
 	public LA_Object getObject() {
 		return _object;
-	}
-	
-	static void initialize(Set<Long> ids) {
-		initActions(ids);
-		initInfos(ids);
-		initReferences(ids);
-		initExtAttributes(ids);
-	}
-	
-	private static void initActions(Set<Long> ids) {
-		try {
-			StringBuffer sb = new StringBuffer();
-			sb.append("SELECT id,action FROM D4LA_Activity WHERE action IS NOT NULL");
-			ResultSet rs = JDBC_DataProvider.executeQuery(new String(sb));
-			while ( rs.next() ) {
-				Long id = new Long(rs.getLong(1));
-				if ( ids.contains(id)) {
-					JDBC_Activity activity = ACTIVITIES.get(id);
-					activity._action = rs.getString(2);
-				}
-			}
-			rs.close();
-		} catch ( Exception e ) { e.printStackTrace(); }
-	}
-	
-	private static void initInfos(Set<Long> ids) {
-		try {
-			StringBuffer sb = new StringBuffer();
-			sb.append("SELECT id,info FROM D4LA_Activity WHERE info IS NOT NULL");
-			ResultSet rs = JDBC_DataProvider.executeQuery(new String(sb));
-			while ( rs.next() ) {
-				Long id = new Long(rs.getLong(1));
-				if ( ids.contains(id)) {
-					JDBC_Activity activity = ACTIVITIES.get(id);
-					activity._info = rs.getString(2);
-				}
-			}
-			rs.close();
-		} catch ( Exception e ) { e.printStackTrace(); }
-	}
-	
-	private static void initReferences(Set<Long> ids) {
-		try {
-			StringBuffer sb = new StringBuffer();
-			sb.append("SELECT id,reference FROM D4LA_Activity WHERE reference IS NOT NULL");
-			ResultSet rs = JDBC_DataProvider.executeQuery(new String(sb));
-			while ( rs.next() ) {
-				Long id = new Long(rs.getLong(1));
-				if ( ids.contains(id)) {
-					JDBC_Activity activity = ACTIVITIES.get(id);
-					id = new Long(rs.getLong(2));
-					activity._reference = ACTIVITIES.get(id);
-				}
-			}
-			rs.close();
-		} catch ( Exception e ) { e.printStackTrace(); }
-	}
-	
-	static void initExtAttributes(Set<Long> ids) {
-		try {
-			StringBuffer sb = new StringBuffer();
-			sb.append("SELECT attr,value,activity FROM D4LA_Activity_Ext");
-			ResultSet rs = JDBC_DataProvider.executeQuery(new String(sb));
-			while ( rs.next() ) {
-				Long id = new Long(rs.getLong(3));
-				if ( ids.contains(id)) {
-					JDBC_Activity activity = ACTIVITIES.get(id);
-					if ( activity._extAttributes == null ) activity._extAttributes = new HashMap<String,String>();
-					activity._extAttributes.put(rs.getString(1), rs.getString(2));
-				}
-			}
-			rs.close();
-		} catch ( Exception e ) { e.printStackTrace(); }
 	}
 	
 	static JDBC_Activity findById(Long id) {

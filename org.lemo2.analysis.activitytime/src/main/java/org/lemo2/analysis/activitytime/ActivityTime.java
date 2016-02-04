@@ -20,6 +20,7 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.ServiceProperty;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import org.lemo2.analysis.activitytime.returntypes.ResultListLongObject;
 import org.lemo2.dataprovider.api.DataProvider;
 import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
+import org.lemo2.webapplication.api.AnalyticsTool;
 import org.lemo2.analysis.api.WebResource;
 
 
@@ -40,12 +42,12 @@ import org.lemo2.analysis.api.WebResource;
 @Provides
 @Instantiate
 @Path("tools/activitytime")
-public class ActivityTimeWebResource implements WebResource{
+public class ActivityTime implements WebResource,AnalyticsTool{
 
 	@Requires
 	private DataProvider dataProvider;
 	
-	private static final Logger logger = LoggerFactory.getLogger(ActivityTimeWebResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(ActivityTime.class);
 	private double intervall;
 	
 	@GET
@@ -255,4 +257,37 @@ public class ActivityTimeWebResource implements WebResource{
 			throw new BadRequestException("Invalid start time: start time exceeds end time.");
 		}
 	}
+	
+
+	@ServiceProperty(name = "lemo.tool.id")
+	private String id = "activitytime";
+
+	@ServiceProperty(name = "lemo.tool.name")
+	private String name = "Activity Time";
+
+	@ServiceProperty(name = "lemo.tool.description.short")
+	private String descriptionShort = "Zeigt Aktivitäten der Nutzer in Kursen an.";
+
+	@ServiceProperty(name = "lemo.tool.description.long")
+	private String descriptionLong = "Mit der Analyse „Aktivität Zeit (Heatmap)“ erhalten Sie einen Überblick über die Intensität der"
+			+ " täglichen Materialnutzung  im  Lauf  der  Zeit  anhand  verschieden intensiv  gefärbten  Farbfeldern  und  können "
+			+ " diese  mit  der  Intensität  der  Aktivität in anderen Kursen vergleichen.";
+
+	@ServiceProperty(name = "lemo.tool.scripts")
+	private final List<String> scripts;
+	{
+		scripts = new ArrayList<>();
+		scripts.add("js/activitytime.js");
+		scripts.add("js/getData.js");
+		scripts.add("js/nv.d3.js");
+	}
+
+	@ServiceProperty(name = "lemo.tool.image.icon.monochrome")
+	private String iconMonochrome = "img/icon-monochrome.svg";
+
+	@ServiceProperty(name = "lemo.tool.image.icon.color")
+	private String iconColor = "img/icon-color.svg";
+
+	@ServiceProperty(name = "lemo.tool.image.preview")
+	private String imagePreview = "img/preview.png";
 }

@@ -3,6 +3,7 @@ package org.lemo2.dataprovider.mongodb;
 import java.util.List;
 
 import org.lemo2.dataprovider.api.DataProvider;
+import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
@@ -11,6 +12,10 @@ public class MongoDB_DataProvider implements DataProvider {
 	
 	public MongoDB_DataProvider(String host, String databaseName, int databasePort) {
 		new MongoDB_Connector(host, databaseName, databasePort);
+	}
+	
+	public List<LA_Activity> getActivities(int personID, int lObjectID, long start, long end) {
+		return null;
 	}
 	
 	@Override

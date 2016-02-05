@@ -19,7 +19,7 @@ import com.mongodb.DBObject;
 
 public class MongoDB_Context implements LA_Context {
 	
-	private Integer contextID;
+	private Long contextID;
 	private String name;
 	private String descriptor;
 	private LA_Context parent;
@@ -32,12 +32,12 @@ public class MongoDB_Context implements LA_Context {
 	
 	public MongoDB_Context(DBObject contextObject) {
 		this.descriptor = Integer.toString(hashCode());
-		this.contextID = (Integer) contextObject.get("_id");
+		this.contextID = (Long) contextObject.get("_id");
 		this.name = (String) contextObject.get("name");
 	
 		extractExtentions(contextObject);
 		extractReference(contextObject);
-		extractLearningActivities(contextObject);
+		//extractLearningActivities(contextObject);
 		extractLearningObjects(contextObject);
 		
 		initialize();
@@ -56,13 +56,15 @@ public class MongoDB_Context implements LA_Context {
 		
 		BasicDBList extList = (BasicDBList) contextObject.get("extentions");
 	   
-	    for (int i = 0; i < extList.size(); i++) {
-	    	BSONObject extention = (BSONObject) extList.get(i);
-	    	String attr = (String) extention.get("ext_attr");
-	    	String value = (String) extention.get("ext_value");
-	    	
-	    	extAttributes.put(attr, value);
-	    }
+		if (extList != null) {
+		    for (int i = 0; i < extList.size(); i++) {
+		    	BSONObject extention = (BSONObject) extList.get(i);
+		    	String attr = (String) extention.get("ext_attr");
+		    	String value = (String) extention.get("ext_value");
+		    	
+		    	extAttributes.put(attr, value);
+		    }
+		}
 	}
 	
 	/**
@@ -91,7 +93,11 @@ public class MongoDB_Context implements LA_Context {
 		List<LA_Object> contextObjects = MongoDB_ObjectDataProvider.getLearningObjectsByIDList(objectIDs);
 		this.contextObjects = contextObjects;
 	}
-
+	
+	public Long getID() {
+		return this.contextID;
+	}
+	
 	@Override
 	public String getName() {
 		return this.name;
@@ -139,7 +145,32 @@ public class MongoDB_Context implements LA_Context {
 
 	@Override
 	public List<LA_Activity> getActivities() {
+		
+		if (!allActivitiesAreInitialized()) {
+			List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(this.contextID);
+			this.contextActivities = MongoDB_ActivityDataProvider.getActivitiesByIDList(activityIDs);
+		}
+		
 		return this.contextActivities;
+	}
+	
+	/**
+	 * Checks if all of the context activities are already initialized.
+	 * @return
+	 */
+	private boolean allActivitiesAreInitialized() {
+		if (this.contextActivities == null) {
+			return false;
+		}
+		else {
+			List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(this.contextID);
+			if (this.contextActivities.size() != activityIDs.size()) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
 	}
 
 	@Override
@@ -150,6 +181,38 @@ public class MongoDB_Context implements LA_Context {
 	@Override
 	public List<LA_Person> getInstructors() {
 		return this.instructors;
+	}
+
+	@Override
+	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj, long start, long end) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<LA_Activity> getActivitiesRecursive() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<LA_Activity> getActivitiesRecursive(LA_Person person,
+			LA_Object obj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<LA_Activity> getActivitiesRecursive(LA_Person person,
+			LA_Object obj, long start, long end) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -70,13 +70,15 @@ public class MongoDB_Object implements LA_Object {
 		
 		BasicDBList extList = (BasicDBList) dbObject.get("extensions");
 	   
-	    for (int i = 0; i < extList.size(); i++) {
-	    	BSONObject extention = (BSONObject) extList.get(i);
-	    	String attr = (String) extention.get("ext_attr");
-	    	String value = (String) extention.get("ext_value");
-	    	
-	    	extAttributes.put(attr, value);
-	    }
+		if (extList != null) {
+		    for (int i = 0; i < extList.size(); i++) {
+		    	BSONObject extention = (BSONObject) extList.get(i);
+		    	String attr = (String) extention.get("ext_attr");
+		    	String value = (String) extention.get("ext_value");
+		    	
+		    	extAttributes.put(attr, value);
+		    }
+		}
 	}
 	
 	@Override

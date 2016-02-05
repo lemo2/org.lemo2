@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
 
@@ -15,9 +16,9 @@ import com.mongodb.DBObject;
 
 public class MongoDB_ContextDataProvider {
 
-	private static Map<Integer, MongoDB_Context> INITIALIZED_CONTEXTS = new HashMap<Integer, MongoDB_Context>();
+	private static Map<Long, MongoDB_Context> INITIALIZED_CONTEXTS = new HashMap<Long, MongoDB_Context>();
 	
-	public static void initializeContext(Integer contextID, MongoDB_Context context) {
+	public static void initializeContext(Long contextID, MongoDB_Context context) {
 		INITIALIZED_CONTEXTS.put(contextID, context);
 	}
 	
@@ -41,33 +42,58 @@ public class MongoDB_ContextDataProvider {
 		return context;
 	}
 	
+	public static List<Integer> getContextActivityIDs(Long contextID) {
+		DBCollection collection = MongoDB_Connector.connectToContextCollection();
+		
+		BasicDBObject whereQuery = new BasicDBObject();
+		whereQuery.put("_id", contextID);
+		DBObject result = collection.findOne(whereQuery);
+		
+		List<Integer> activityIDs = (List<Integer>) result.get("learningActivities");
+		
+		return activityIDs;
+	}
+	
+	
 	public static List<LA_Context> getAllCourses() {
 		List<LA_Context> courses = new ArrayList<LA_Context>();
 		
-		// find all courses
+		// find all parent courses
 		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
 		BasicDBObject parentNullQuery = new BasicDBObject();
-		parentNullQuery.put("parent", null);
+		parentNullQuery.put("parent", 0);
 		
 		// iterate database results
 		DBCursor cursor = contextCollection.find(parentNullQuery);
+
 		while (cursor.hasNext()) {
 			DBObject obj = cursor.next();
-			Integer contextID = (Integer) obj.get("_id");
+			Long contextID = (Long) obj.get("_id");
 			
-			// load / create domain object
-			MongoDB_Context course = INITIALIZED_CONTEXTS.get(contextID);
-			if (course == null) {
-				course =  new MongoDB_Context(obj);
-			}
+			// Create parent object and its children
+			MongoDB_Context course = createContextObject(obj);
+			List<MongoDB_Context> children = new ArrayList<MongoDB_Context>();
+			children = getChildrenTreeOfCourse(contextID, children);
+
 			courses.add(course);
+			courses.addAll(children);
 		}
-		
+	
 		return courses;
 	}
 	
-	public static List<LA_Context> getChildrenOfCourse(Integer contextID) {
-		List<LA_Context> contextChildren = new ArrayList<LA_Context>();
+	private static List<MongoDB_Context> getChildrenTreeOfCourse(Long contextID, List<MongoDB_Context> children)
+	{
+	   for( MongoDB_Context child : getChildrenOfCourse(contextID) )
+	   {
+		   children.add(child);
+		   getChildrenTreeOfCourse(child.getID(), children);
+	   }
+	   return children;
+	}
+	
+	private static List<MongoDB_Context> getChildrenOfCourse(Long contextID) {
+		List<MongoDB_Context> contextChildren = new ArrayList<MongoDB_Context>();
 		
 		// find all courses
 		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
@@ -78,16 +104,11 @@ public class MongoDB_ContextDataProvider {
 		DBCursor cursor = contextCollection.find(parentNullQuery);
 		while (cursor.hasNext()) {
 			DBObject obj = cursor.next();
-			Integer childID = (Integer) obj.get("_id");
+			MongoDB_Context child = createContextObject(obj);
 			
-			// load / create domain object
-			MongoDB_Context child = INITIALIZED_CONTEXTS.get(childID);
-			if (child == null) {
-				child = new MongoDB_Context(obj);
-			}		
 			contextChildren.add(child);
 		}
-		
+	
 		return contextChildren;
 	}
 	
@@ -106,13 +127,8 @@ public class MongoDB_ContextDataProvider {
 		DBCursor cursor = contextCollection.find(instructorQuery);
 		while (cursor.hasNext()) {
 			DBObject obj = cursor.next();
-			Integer contextID = (Integer) obj.get("_id");
+			LA_Context course = createContextObject(obj);
 			
-			// load / create domain object
-			MongoDB_Context course = INITIALIZED_CONTEXTS.get(contextID);
-			if (course == null) {
-				course =  new MongoDB_Context(obj);
-			}
 			courses.add(course);
 		}
 		
@@ -128,6 +144,18 @@ public class MongoDB_ContextDataProvider {
 		}
 		
 		return null;
+	}
+	
+	private static MongoDB_Context createContextObject(DBObject dbObject) {
+		Integer childID = (Integer) dbObject.get("_id");
+		
+		// load / create domain object
+		MongoDB_Context context = INITIALIZED_CONTEXTS.get(childID);
+		if (context == null) {
+			context = new MongoDB_Context(dbObject);
+		}
+		
+		return context;
 	}
 
 }

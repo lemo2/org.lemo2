@@ -21,6 +21,16 @@ public interface LA_Context {
 	
 	public List<LA_Activity> getActivities();
 	
+	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj);
+	
+	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj, long start, long end);
+	
+	public List<LA_Activity> getActivitiesRecursive();
+	
+	public List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj);
+	
+	public List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj, long start, long end);
+	
 	public List<LA_Person> getStudents();
 		
 	public List<LA_Person> getInstructors();

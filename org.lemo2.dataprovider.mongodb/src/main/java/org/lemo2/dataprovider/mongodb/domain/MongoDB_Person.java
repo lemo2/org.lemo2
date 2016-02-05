@@ -59,13 +59,15 @@ public class MongoDB_Person implements LA_Person {
 		
 		BasicDBList extList = (BasicDBList) personDBObject.get("extentions");
 	   
-	    for (int i = 0; i < extList.size(); i++) {
-	    	BSONObject extention = (BSONObject) extList.get(i);
-	    	String attr = (String) extention.get("ext_attr");
-	    	String value = (String) extention.get("ext_value");
-	    	
-	    	extAttributes.put(attr, value);
-	    }
+		if (extList != null) {
+		    for (int i = 0; i < extList.size(); i++) {
+		    	BSONObject extention = (BSONObject) extList.get(i);
+		    	String attr = (String) extention.get("ext_attr");
+		    	String value = (String) extention.get("ext_value");
+		    	
+		    	extAttributes.put(attr, value);
+		    }
+		}
 	}
 	
 	@Override

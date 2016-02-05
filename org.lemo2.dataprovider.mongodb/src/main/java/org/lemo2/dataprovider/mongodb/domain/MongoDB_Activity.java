@@ -35,7 +35,8 @@ public class MongoDB_Activity implements LA_Activity {
 	
 	public MongoDB_Activity(DBObject activityObject) {
 		this.activityID = (Integer) activityObject.get("_id");
-		this.time = (long) activityObject.get("time");
+		Integer tmpTime = (Integer) activityObject.get("time");
+		this.time = tmpTime;
 		this.action = (String) activityObject.get("action");
 		this.info = (String) activityObject.get("info");
 		
@@ -60,13 +61,15 @@ public class MongoDB_Activity implements LA_Activity {
 		
 		BasicDBList extList = (BasicDBList) activityObject.get("extentions");
 	   
-	    for (int i = 0; i < extList.size(); i++) {
-	    	BSONObject extention = (BSONObject) extList.get(i);
-	    	String attr = (String) extention.get("ext_attr");
-	    	String value = (String) extention.get("ext_value");
-	    	
-	    	extAttributes.put(attr, value);
-	    }
+		if (extList != null) {
+		    for (int i = 0; i < extList.size(); i++) {
+		    	BSONObject extention = (BSONObject) extList.get(i);
+		    	String attr = (String) extention.get("ext_attr");
+		    	String value = (String) extention.get("ext_value");
+		    	
+		    	extAttributes.put(attr, value);
+		    }
+		}
 	}
 	
 	/**

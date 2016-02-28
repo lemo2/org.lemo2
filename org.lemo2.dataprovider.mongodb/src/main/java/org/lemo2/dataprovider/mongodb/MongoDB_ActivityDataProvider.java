@@ -1,14 +1,22 @@
 package org.lemo2.dataprovider.mongodb;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.lemo2.dataprovider.api.LA_Activity;
+import org.lemo2.dataprovider.api.LA_Context;
+import org.lemo2.dataprovider.api.LA_Object;
+import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Activity;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Object;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Person;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -19,6 +27,491 @@ public class MongoDB_ActivityDataProvider {
 	
 	public static void initializeActivity(Integer activityID, MongoDB_Activity activity) {
 		INITIALIZED_ACTIVITIES.put(activityID, activity);
+	}
+	
+	// For test
+	public static List<Integer> getAllLearningActivityIDs() {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<Integer> activityIDs = new ArrayList<Integer>();
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		select.put("_id", 1);
+		
+		DBCursor cursor = collection.find(idQuery, select);
+		
+		int activityID;
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			activityID = (Integer) dbObj.get("_id");
+			activityIDs.add(activityID);
+		}
+		
+		return activityIDs;
+	}
+	
+	public static LA_Object getLearningObjectOfActivity(Integer activityID) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		LA_Object lObject = null;
+		Integer lObjectID = null;
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		idQuery.put("_id", activityID);
+		select.put("learningObject", 1); // just return 'reference' field
+		
+		DBCursor cursor = collection.find(idQuery, select).limit(1); 
+		
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			lObjectID = (Integer) dbObj.get("learningObject");
+			lObject = MongoDB_ObjectDataProvider.getLearningObjectByID(lObjectID);
+		}
+		
+		return lObject;
+	}
+	
+	public static LA_Person getPersonOfActivity(Integer activityID) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		LA_Person person = null;
+		Integer personID = null;
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		idQuery.put("_id", activityID);
+		select.put("person", 1); // just return 'reference' field
+		
+		DBCursor cursor = collection.find(idQuery, select).limit(1); 
+		
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			personID = (Integer) dbObj.get("learningObject");
+			person = MongoDB_PersonDataProvider.getPersonByID(personID);
+		}
+		
+		return person;
+	}
+	
+	public static LA_Activity getReferenceOfActivity(Integer activityID) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		LA_Activity reference = null;
+		Integer referenceID = null;
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		idQuery.put("_id", activityID);
+		select.put("reference", 1); // just return 'reference' field
+		
+		DBCursor cursor = collection.find(idQuery, select).limit(1); 
+		
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			referenceID = (Integer) dbObj.get("reference");
+			reference = getActivityByID(referenceID);
+		}
+		
+		return reference;
+	}
+	
+	/**
+	 * Returns the list of activity IDs for the given learning context. 
+	 * @param context
+	 * @return
+	 */
+	public static List<Integer> getContextActivityIDs(MongoDB_Context context) {
+		DBCollection collection = MongoDB_Connector.connectToContextCollection();
+		List<Integer> activityIDs = new ArrayList<Integer>();
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		idQuery.put("_id", context.getID());
+		select.put("learningActivities", 1);
+		
+		DBCursor cursor = collection.find(idQuery, select); 
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			activityIDs = (List<Integer>) dbObj.get("learningActivities");
+		}
+		
+		return activityIDs;
+	}
+	
+	public static List<LA_Activity> getActivities(LA_Context context) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		MongoDB_Context mContext = (MongoDB_Context) context;
+		
+		List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(mContext.getID());
+		activities = MongoDB_ActivityDataProvider.getActivitiesByIDList(activityIDs);
+		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getActivities(LA_Context context, LA_Person person, LA_Object obj, 
+			long start, long end) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		MongoDB_Context mContext = (MongoDB_Context) context;
+		MongoDB_Person mPerson;
+		MongoDB_Object mObj;
+		
+		// choose wildcard function
+		if (person != null && obj != null) {
+			mPerson = (MongoDB_Person) person;
+			mObj = (MongoDB_Object) obj;		
+			
+			activities = getActivitiesNoWildcard(mPerson, mObj, start, end);
+		}
+		else if (person != null && obj == null) {
+			mPerson = (MongoDB_Person) person;		
+			
+			activities = getActivitiesWildcardLearningObject(mContext, mPerson, start, end);
+		}
+		else if (person == null && obj != null) {
+			mObj = (MongoDB_Object) obj;
+			
+			activities = getActivitiesWildcardPerson(mObj, start, end);
+		}
+		else {
+			activities = getActivitiesWildcardPersonAndLearningObject(mContext, start, end);
+		}
+		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getActivities(LA_Context context, LA_Person person, LA_Object obj) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+
+		MongoDB_Context mContext = (MongoDB_Context) context;
+		MongoDB_Person mPerson;
+		MongoDB_Object mObj;
+		
+		if (person != null && obj != null) {
+			mPerson = (MongoDB_Person) person;
+			mObj = (MongoDB_Object) obj;	
+			
+			activities = getActivitiesWildcardTimeRange(mPerson, mObj);
+		}
+		else if (person != null && obj == null) {
+			mPerson = (MongoDB_Person) person;		
+			
+			activities = getActivitiesWildcardLearningObjectAndTimeRange(mContext, mPerson);
+		}
+		else if (person == null && obj != null) {
+			mObj = (MongoDB_Object) obj;
+			
+			activities = getActivitiesWildcardPersonAndTimeRange(mObj);
+		}
+		else {
+			activities = getActivitiesWildcardPersonAndLearningObjectAndTimerange(mContext);
+		}
+		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getActivities(LA_Context context, LA_Person person) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		MongoDB_Context mContext = (MongoDB_Context) context;
+		MongoDB_Person mPerson;
+		
+		if (person != null) {
+			mPerson = (MongoDB_Person) person;
+			
+			activities = getActivitiesWildcardLearningObjectAndTimeRange(mContext, mPerson);
+		}
+		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getActivities(LA_Object obj) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		MongoDB_Object mObj;
+		
+		if (obj != null) {
+			mObj = (MongoDB_Object) obj;
+			
+			activities = getActivitiesWildcardPersonAndTimeRange(mObj);
+		}
+		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getActivitiesRecursive(MongoDB_Context context) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		List<LA_Context> contextTree = new ArrayList<LA_Context>();
+		
+		// get children tree of the given context
+		contextTree = MongoDB_ContextDataProvider.getChildrenTreeOfContext(context, contextTree);
+		contextTree.add(context);
+		
+		// get the activities for all contexts
+		for (LA_Context mContext : contextTree) {
+			activities.addAll(getActivities(mContext));
+		}
+		
+		return activities;
+	}
+
+	public static List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		MongoDB_Person mPerson;
+		MongoDB_Object mObj;
+		
+		if (person != null && obj != null) {
+			mPerson = (MongoDB_Person) person;
+			mObj = (MongoDB_Object) obj;
+			
+			activities = getActivitiesWildcardTimeRange(mPerson, mObj);
+		}
+		
+		return activities;
+	}
+
+	public static List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj, 
+			long start, long end) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		List<MongoDB_Object> objectTree = new ArrayList<MongoDB_Object>();
+		
+		MongoDB_Person mPerson;
+		MongoDB_Object mObj;
+		
+		if (person != null && obj != null) {
+			mPerson = (MongoDB_Person) person;
+			mObj = (MongoDB_Object) obj;
+			
+			objectTree = MongoDB_ObjectDataProvider.getChildrenTreeOfLearningObject(mObj.getID(), objectTree);
+			objectTree.add(mObj);
+			
+			for (MongoDB_Object tempObj : objectTree) {
+				activities.addAll(getActivitiesNoWildcard(mPerson, tempObj, start, end));
+			}
+		}
+		
+		return activities;
+	}
+	
+	private static List<LA_Activity> getActivitiesNoWildcard(MongoDB_Person person, MongoDB_Object obj,
+			long start, long end) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+		
+		selectQuery.put("person", person.getID());
+		selectQuery.put("learningObject", obj.getID());
+		selectQuery.put("time", buildTimeRangeQuery(start, end));
+		
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			Integer activityID = (Integer) dbObj.get("_id");
+			
+			// check if learning activity was already initialized
+			LA_Activity activity = INITIALIZED_ACTIVITIES.get(activityID);
+			if (activity == null) {
+				activity = new MongoDB_Activity(dbObj);
+			}
+			contextActivities.add(activity);
+		}
+	    
+		return contextActivities;
+	}
+	
+	/**
+	 * Returns all learning activities for the given context, which took part in the given timeperiod.
+	 * @param context
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private static List<LA_Activity> getActivitiesWildcardPersonAndLearningObject(MongoDB_Context context, 
+			long start, long end) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		List<Integer> activityIDs = getContextActivityIDs(context);
+		
+		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+		
+		selectQuery.put("time", buildTimeRangeQuery(start, end));
+			selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity activity = createActivityObject(dbObj);
+			contextActivities.add(activity);
+		}
+	    
+		return contextActivities;
+	}
+	
+	private static List<LA_Activity> getActivitiesWildcardPersonAndLearningObjectAndTimerange(MongoDB_Context context) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		List<Integer> activityIDs = getContextActivityIDs(context);
+		
+		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+		
+		selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity activity = createActivityObject(dbObj);
+			contextActivities.add(activity);
+		}
+	    
+		return contextActivities;
+	}
+	
+	/**
+	 * TODO: weg?
+	 * @param person
+	 * @param contextID
+	 * @return
+	 */
+	private static List<LA_Activity> getActivitiesWildcardLearningObjectAndTimeRange(MongoDB_Context context, 
+			MongoDB_Person person) {		
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		List<Integer> objectIDs = MongoDB_ContextDataProvider.getContextLearningObjectIDs(context.getID());
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+
+		selectQuery.put("person", person.getID());
+		selectQuery.put("learningObject", new BasicDBObject("$in", objectIDs));
+	    
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity lActivity = createActivityObject(dbObj);
+			activities.add(lActivity);
+		}
+		
+		return activities;
+	}
+	
+	/**
+	 * TODO: weg?
+	 * @param person
+	 * @param contextID
+	 * @return
+	 */
+	private static List<LA_Activity> getActivitiesWildcardLearningObject(MongoDB_Context context,
+			MongoDB_Person person, long start, long end) {		
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		List<Integer> objectIDs = MongoDB_ContextDataProvider.getContextLearningObjectIDs(context.getID());
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+
+		selectQuery.put("person", person.getID());
+		selectQuery.put("learningObject", new BasicDBObject("$in", objectIDs));
+		selectQuery.put("time", buildTimeRangeQuery(start, end));
+	    
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity lActivity = createActivityObject(dbObj);
+			activities.add(lActivity);
+		}
+		
+		return activities;
+	}
+	
+	private static List<LA_Activity> getActivitiesWildcardPersonAndTimeRange(MongoDB_Object obj) {		
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+
+		BasicDBObject selectQuery = new BasicDBObject();
+		selectQuery.put("learningObject", obj.getID());
+	    
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    LA_Activity[] activityArr = new LA_Activity[cursor.size()];
+	    int i = 0;
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			//activities.add(createActivityObject(dbObj));
+			activityArr[i] = createActivityObject(dbObj);
+		}
+		
+		return new ArrayList<LA_Activity>(Arrays.asList(activityArr));
+	}
+	
+	private static List<LA_Activity> getActivitiesWildcardPerson(MongoDB_Object obj, long start, long end) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+		selectQuery.put("learningObject", obj.getID());
+		selectQuery.put("time", buildTimeRangeQuery(start, end));
+	    
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity lActivity = createActivityObject(dbObj);
+			activities.add(lActivity);
+		}
+		
+		return activities;
+	}
+	
+	private static List<LA_Activity> getActivitiesWildcardTimeRange(MongoDB_Person person, MongoDB_Object obj) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		BasicDBObject selectQuery = new BasicDBObject();
+		
+		selectQuery.put("person", person.getID());
+		selectQuery.put("learningObject", obj.getID());
+	    
+	    DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity lActivity = createActivityObject(dbObj);
+			activities.add(lActivity);
+		}
+		
+		return activities;
+	}
+	
+	/**
+	 * Builds and returns a query based on the given values.
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private static DBObject buildTimeRangeQuery(long start, long end) {
+		DBObject dbObj;
+		if (start > 0 && end > 0) {
+			return BasicDBObjectBuilder.start("$gte", start).add("$lte", end).get();
+		}
+		else if (start > 0 && end == 0) {
+			return BasicDBObjectBuilder.start("$gte", start).get();
+		}
+		else if (start == 0 && end > 0) {
+			return BasicDBObjectBuilder.start("$lte", end).get();
+		}
+		else {
+			return null;
+		}
 	}
 	
 	/**
@@ -35,10 +528,10 @@ public class MongoDB_ActivityDataProvider {
 		if (activity == null) {
 			DBCollection collection = MongoDB_Connector.connectToActivityCollection();
 			
-			BasicDBObject whereQuery = new BasicDBObject();
-			whereQuery.put("_id", activityID);
+			BasicDBObject selectQuery = new BasicDBObject();
+			selectQuery.put("_id", activityID);
 			
-			DBCursor cursor = collection.find(whereQuery);
+			DBCursor cursor = collection.find(selectQuery);
 			while(cursor.hasNext()) {
 				DBObject dbObj = cursor.next();
 				activity = new MongoDB_Activity(dbObj);
@@ -57,7 +550,7 @@ public class MongoDB_ActivityDataProvider {
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		List<Integer> tmpActivities = new ArrayList<Integer>();
 		
-		LA_Activity lActivity;
+		MongoDB_Activity lActivity;
 		
 		// Load initialized activities
 		for (int aID : activityIDs) {
@@ -72,10 +565,10 @@ public class MongoDB_ActivityDataProvider {
 		
 		// load activities from database which are not initialized
 		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
-		BasicDBObject whereQuery = new BasicDBObject();
-		whereQuery.put("_id", new BasicDBObject("$in", tmpActivities));
+		BasicDBObject selectQuery = new BasicDBObject();
+		selectQuery.put("_id", new BasicDBObject("$in", tmpActivities));
 		
-		DBCursor cursor = collection.find(whereQuery);
+		DBCursor cursor = collection.find(selectQuery);
 		while(cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
 			lActivity = new MongoDB_Activity(dbObj);
@@ -85,14 +578,31 @@ public class MongoDB_ActivityDataProvider {
 		return activities;
 	}
 	
-	public static LA_Activity getActivityByDescriptor(String descriptor) {
-		for (LA_Activity activity : INITIALIZED_ACTIVITIES.values()) {
+	/**
+	 * Does a lookup in a HashMap for the descriptor (key) and returns the initialized activity.
+	 * @param descriptor
+	 * @return
+	 */
+	public static MongoDB_Activity getActivityByDescriptor(String descriptor) {
+		for (MongoDB_Activity activity : INITIALIZED_ACTIVITIES.values()) {
 			if (activity.equals(descriptor)) {
 				return activity;
 			}
 		}
 		
 		return null;
+	}
+	
+	private static MongoDB_Activity createActivityObject(DBObject dbObject) {
+		Integer activityID = (Integer) dbObject.get("_id");
+		
+		// load / create domain object
+		MongoDB_Activity activity = INITIALIZED_ACTIVITIES.get(activityID);
+		if (activity == null) {
+			activity = new MongoDB_Activity(dbObject);
+		}
+		
+		return activity;
 	}
 	
 }

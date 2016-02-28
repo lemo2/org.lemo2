@@ -25,7 +25,7 @@ public class JDBC_DataProvider implements DataProvider {
 	
 	static private Statement STATEMENT = null;
 	
-	static private final String URI = "jdbc:mysql://localhost:3306/d4la_moodle";
+	static private final String URI = "jdbc:mysql://localhost:3306/d4la_iversity";
 	static private final String USER = "root";
 	static private final String PASSWORD = "";
 	

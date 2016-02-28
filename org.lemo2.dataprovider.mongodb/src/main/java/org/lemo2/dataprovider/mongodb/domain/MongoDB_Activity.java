@@ -18,7 +18,7 @@ import com.mongodb.DBObject;
 
 public class MongoDB_Activity implements LA_Activity {
 	
-	private Integer activityID;
+	private int activityID;
 	private long time;
 	private String action;
 	private String info;
@@ -34,8 +34,8 @@ public class MongoDB_Activity implements LA_Activity {
 	}
 	
 	public MongoDB_Activity(DBObject activityObject) {
-		this.activityID = (Integer) activityObject.get("_id");
-		Integer tmpTime = (Integer) activityObject.get("time");
+		this.activityID = (int) activityObject.get("_id");
+		int tmpTime = (int) activityObject.get("time");
 		this.time = tmpTime;
 		this.action = (String) activityObject.get("action");
 		this.info = (String) activityObject.get("info");
@@ -44,7 +44,7 @@ public class MongoDB_Activity implements LA_Activity {
 		extractReference(activityObject);
 		extractLearningObject(activityObject);
 		extractPerson(activityObject);
-		
+
 		initialize();
 	}
 	
@@ -98,7 +98,7 @@ public class MongoDB_Activity implements LA_Activity {
 	
 	private void extractPerson(DBObject activityObject) {
 		Integer personID =  (Integer) activityObject.get("personID");
-		LA_Person person = MongoDB_PersonDataProvider.loadPersonByID(personID);
+		LA_Person person = MongoDB_PersonDataProvider.getPersonByID(personID);
 		
 		this.activityPerson = person;
 	}
@@ -120,37 +120,43 @@ public class MongoDB_Activity implements LA_Activity {
 
 	@Override
 	public Set<String> extAttributes() {
-		if (this.extAttributes == null) {
+		if (extAttributes == null) {
 			return null;
 		}
 		else {
-			return this.extAttributes.keySet();
+			return extAttributes.keySet();
 		}
 	}
 
 	@Override
 	public String getExtAttribute(String attrKey) {
-		if (this.extAttributes == null) {
+		if (extAttributes == null) {
 			return null;
 		}
 		else {
-			return this.extAttributes.get(attrKey);
+			return extAttributes.get(attrKey);
 		}
 	}
 
 	@Override
 	public LA_Activity getReference() {
-		return this.reference;
+		if (reference == null) {
+			reference = MongoDB_ActivityDataProvider.getReferenceOfActivity(activityID);
+		}
+		return reference;
 	}
 
 	@Override
 	public LA_Object getObject() {
-		return this.activityObject;
+		if (activityObject == null) {
+			activityObject = MongoDB_ActivityDataProvider.getLearningObjectOfActivity(activityID);
+		}
+		return activityObject;
 	}
 
 	@Override
 	public LA_Person getPerson() {
-		return this.activityPerson;
+		return activityPerson;
 	}
 
 }

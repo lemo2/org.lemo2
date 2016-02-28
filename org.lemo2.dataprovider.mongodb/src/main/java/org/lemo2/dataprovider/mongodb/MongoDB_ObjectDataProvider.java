@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.lemo2.dataprovider.api.LA_Object;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Object;
 
 import com.mongodb.BasicDBObject;
@@ -21,8 +22,30 @@ public class MongoDB_ObjectDataProvider {
 		INITIALIZED_OBJECTS.put(objectID, lObject);
 	}
 	
+	// For test
+	public static List<Integer> getAllLearningObjectIDs() {
+		DBCollection collection = MongoDB_Connector.connectToObjectCollection();
+		
+		List<Integer> objectIDs = new ArrayList<Integer>();
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		select.put("_id", 1);
+		
+		DBCursor cursor = collection.find(idQuery, select);
+		
+		int objectID;
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			objectID = (Integer) dbObj.get("_id");
+			objectIDs.add(objectID);
+		}
+		
+		return objectIDs;
+	}
+	
 	public static LA_Object getLearningObjectByID(Integer objectID) {
-		LA_Object lObject = INITIALIZED_OBJECTS.get(objectID);
+		MongoDB_Object lObject = INITIALIZED_OBJECTS.get(objectID);
 		
 		// Learning object is not yet initialized
 		if (lObject == null) {
@@ -31,11 +54,10 @@ public class MongoDB_ObjectDataProvider {
 			BasicDBObject whereQuery = new BasicDBObject();
 			whereQuery.put("_id", objectID);
 			
-			DBCursor cursor = collection.find(whereQuery);
+			DBCursor cursor = collection.find(whereQuery).limit(1);
 			while(cursor.hasNext()) {
 				DBObject dbObj = cursor.next();
 				lObject = new MongoDB_Object(dbObj);
-				return lObject;
 			}
 		}
 		
@@ -46,7 +68,7 @@ public class MongoDB_ObjectDataProvider {
 		List<LA_Object> learningObjects = new ArrayList<LA_Object>();
 		List<Integer> tmpIDs = new ArrayList<Integer>();
 		
-		LA_Object lObject;
+		MongoDB_Object lObject;
 		
 		// Load initialized Learning objects
 		for (int aID : objectIDs) {
@@ -74,6 +96,25 @@ public class MongoDB_ObjectDataProvider {
 		return learningObjects;
 	}
 	
+	public static LA_Object getLearningObjectParent(int objectID) {
+		MongoDB_Object parent = null;
+		DBCollection collection = MongoDB_Connector.connectToObjectCollection();
+		
+		BasicDBObject whereQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		whereQuery.put("_id", objectID);
+		select.put("parent", 1);
+		
+		DBCursor cursor = collection.find(whereQuery).limit(1);
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			parent = createLearningObject(dbObj);
+		}
+		
+		return parent;
+	}
+	
+	// TODO: get children tree... wie bei context implementieren 
 	public static List<LA_Object> getChildrenByParentID(Integer objectID) {
 		List<LA_Object> childrenList = new ArrayList<LA_Object>();
 		
@@ -84,30 +125,78 @@ public class MongoDB_ObjectDataProvider {
 		
 		DBCursor cursor = collection.find(whereQuery);
 		while(cursor.hasNext()) {
+
 			DBObject dbObj = cursor.next();
-			Integer childrenID = (Integer) dbObj.get("_id");
-			
-			// load / create children domain object
-			LA_Object lObject = INITIALIZED_OBJECTS.get(childrenID);
-			
-			if (lObject == null) {
-				lObject = new MongoDB_Object(dbObj);
-			}
+			MongoDB_Object lObject = createLearningObject(dbObj);
 			
 			childrenList.add(lObject);
 		}
-		
+	
 		return childrenList;
 	}
 	
-	public static LA_Object getObjectByDescriptor(String descriptor) {
+	/**
+	 * Returns recursively all children and their subsequent children.  
+	 * @param contextID
+	 * @param children
+	 * @return
+	 */
+	protected static List<MongoDB_Object> getChildrenTreeOfLearningObject(Integer objID, 
+			List<MongoDB_Object> children) {
+	   for( MongoDB_Object child : getChildrenOfLearningObject(objID) )
+	   {
+		   children.add(child);
+		   getChildrenTreeOfLearningObject(child.getID(), children);
+	   }
+	   return children;
+	}
+	
+	/**
+	 * Returns a list of Learning objects which refer to the given object id as parent.
+	 * @param contextID
+	 * @return
+	 */
+	private static List<MongoDB_Object> getChildrenOfLearningObject(Integer contextID) {
+		List<MongoDB_Object> objChildren = new ArrayList<MongoDB_Object>();
 		
-		for (LA_Object lObject : INITIALIZED_OBJECTS.values()) {
+		// find all courses
+		DBCollection contextCollection = MongoDB_Connector.connectToObjectCollection();
+		BasicDBObject parentNullQuery = new BasicDBObject();
+		parentNullQuery.put("parent", contextID);
+		
+		// iterate children
+		DBCursor cursor = contextCollection.find(parentNullQuery);
+		while (cursor.hasNext()) {
+			DBObject obj = cursor.next();
+			MongoDB_Object child = createLearningObject(obj);
+
+			objChildren.add(child);
+		}
+	
+		return objChildren;
+	}
+	
+	public static MongoDB_Object getObjectByDescriptor(String descriptor) {
+		
+		for (MongoDB_Object lObject : INITIALIZED_OBJECTS.values()) {
 			if (lObject.equals(descriptor)) {
 				return lObject;
 			}
 		}
 		
 		return null;
+	}
+	
+	private static MongoDB_Object createLearningObject(DBObject dbObject) {
+		Integer objectID = (Integer) dbObject.get("_id");
+		
+		// load / create domain object
+		MongoDB_Object obj = INITIALIZED_OBJECTS.get(objectID);
+		if (obj == null) {
+			obj = new MongoDB_Object(dbObject);
+			INITIALIZED_OBJECTS.put(obj.getID(), obj);
+		}
+		
+		return obj;
 	}
 }

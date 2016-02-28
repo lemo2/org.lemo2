@@ -1,5 +1,6 @@
 package org.lemo2.dataprovider.mongodb.domain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,13 +14,14 @@ import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.MongoDB_ActivityDataProvider;
 import org.lemo2.dataprovider.mongodb.MongoDB_ContextDataProvider;
 import org.lemo2.dataprovider.mongodb.MongoDB_ObjectDataProvider;
+import org.lemo2.dataprovider.mongodb.MongoDB_PersonDataProvider;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 
 public class MongoDB_Context implements LA_Context {
 	
-	private Long contextID;
+	private int contextID;
 	private String name;
 	private String descriptor;
 	private LA_Context parent;
@@ -32,11 +34,11 @@ public class MongoDB_Context implements LA_Context {
 	
 	public MongoDB_Context(DBObject contextObject) {
 		this.descriptor = Integer.toString(hashCode());
-		this.contextID = (Long) contextObject.get("_id");
+		this.contextID = (int) contextObject.get("_id");
 		this.name = (String) contextObject.get("name");
 	
 		extractExtentions(contextObject);
-		extractReference(contextObject);
+		//extractReference(contextObject);
 		//extractLearningActivities(contextObject);
 		extractLearningObjects(contextObject);
 		
@@ -80,6 +82,10 @@ public class MongoDB_Context implements LA_Context {
 		this.parent = parent;
 	}
 	
+	/**
+	 * Extracts and builds the learning activity objects from the DBObject. 
+	 * @param context
+	 */
 	private void extractLearningActivities(DBObject context) {
 		List<Integer> activityIDs = (List<Integer>) context.get("learningActivities");
 		
@@ -87,6 +93,10 @@ public class MongoDB_Context implements LA_Context {
 		this.contextActivities = contextActivities;
 	}
 	
+	/**
+	 * Extracts and builds the learning objects objects from the DBObject. 
+	 * @param context
+	 */
 	private void extractLearningObjects(DBObject context) {
 		List<Integer> objectIDs = (List<Integer>) context.get("learningObjects");
 	    
@@ -94,7 +104,7 @@ public class MongoDB_Context implements LA_Context {
 		this.contextObjects = contextObjects;
 	}
 	
-	public Long getID() {
+	public int getID() {
 		return this.contextID;
 	}
 	
@@ -135,6 +145,9 @@ public class MongoDB_Context implements LA_Context {
 
 	@Override
 	public List<LA_Context> getChildren() {
+		if (children == null) {
+			this.children = MongoDB_ContextDataProvider.getFirstDegreeChildrenOfContext(contextID);
+		}
 		return this.children;
 	}
 
@@ -143,12 +156,15 @@ public class MongoDB_Context implements LA_Context {
 		return this.contextObjects;
 	}
 
+	/**
+	 * TODO: überarbeiten...
+	 */
 	@Override
 	public List<LA_Activity> getActivities() {
 		
+		removeDuplicates();
 		if (!allActivitiesAreInitialized()) {
-			List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(this.contextID);
-			this.contextActivities = MongoDB_ActivityDataProvider.getActivitiesByIDList(activityIDs);
+			this.contextActivities = MongoDB_ActivityDataProvider.getActivities(this);
 		}
 		
 		return this.contextActivities;
@@ -175,44 +191,50 @@ public class MongoDB_Context implements LA_Context {
 
 	@Override
 	public List<LA_Person> getStudents() {
+		if (this.students == null) {
+			this.students = MongoDB_ContextDataProvider.getContextStudents(this.contextID);
+		}
 		return this.students;
 	}
 
 	@Override
 	public List<LA_Person> getInstructors() {
+		if (this.instructors == null) {
+			this.instructors = MongoDB_ContextDataProvider.getContextInstructors(this.contextID);
+		}
 		return this.instructors;
 	}
 
 	@Override
 	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj) {
-		// TODO Auto-generated method stub
-		return null;
+		return MongoDB_ActivityDataProvider.getActivities(this, person, obj);
 	}
 
 	@Override
 	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj, long start, long end) {
-		// TODO Auto-generated method stub
-		return null;
+		return MongoDB_ActivityDataProvider.getActivities(this, person, obj, start, end);
 	}
 
 	@Override
 	public List<LA_Activity> getActivitiesRecursive() {
-		// TODO Auto-generated method stub
-		return null;
+		return MongoDB_ActivityDataProvider.getActivitiesRecursive(this);
 	}
 
 	@Override
-	public List<LA_Activity> getActivitiesRecursive(LA_Person person,
-			LA_Object obj) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj) {
+		return MongoDB_ActivityDataProvider.getActivitiesRecursive(person, obj);
 	}
 
 	@Override
-	public List<LA_Activity> getActivitiesRecursive(LA_Person person,
-			LA_Object obj, long start, long end) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj, long start, long end) {
+		return MongoDB_ActivityDataProvider.getActivitiesRecursive(person, obj, start, end);
 	}
 	
+	private void addActivities(List<LA_Activity> activities) {
+		this.contextActivities.addAll(activities);
+	}
+	
+	private void removeDuplicates() {
+		
+	}
 }

@@ -14,7 +14,7 @@ import com.mongodb.DBObject;
 
 public class MongoDB_Object implements LA_Object {
 	
-	private Integer objectID;
+	private int objectID;
 	private String descriptor;
 	private String name;
 	private String type;
@@ -24,19 +24,19 @@ public class MongoDB_Object implements LA_Object {
 	
 	public MongoDB_Object(DBObject dbObject) {
 		this.descriptor = Integer.toString(hashCode());
-		this.objectID = (Integer) dbObject.get("_id");
+		this.objectID = (int) dbObject.get("_id");
 		this.name = (String) dbObject.get("name");
 		this.type = (String) dbObject.get("type");
-		
+		/*
 		extractExtensions(dbObject);
 		extractParent(dbObject);
 		extractChildren(dbObject);
-		
+		*/
 		initialize();
 	}
 	
 	private void initialize() {
-		MongoDB_ObjectDataProvider.initializeObject(this.objectID, this);
+		MongoDB_ObjectDataProvider.initializeObject(objectID, this);
 	}
 	
 	/**
@@ -81,48 +81,58 @@ public class MongoDB_Object implements LA_Object {
 		}
 	}
 	
+	public int getID() {
+		return objectID;
+	}
+	
 	@Override
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	@Override
 	public String getDescriptor() {
-		return this.descriptor;
+		return descriptor;
 	}
 
 	@Override
 	public String getType() {
-		return this.type;
+		return type;
 	}
 
 	@Override
 	public Set<String> extAttributes() {
-		if (this.extAttributes == null) {
+		if (extAttributes == null) {
 			return null;
 		}
 		else {
-			return this.extAttributes.keySet();
+			return extAttributes.keySet();
 		}
 	}
 
 	@Override
 	public String getExtAttribute(String attrKey) {
-		if (this.extAttributes == null) {
+		if (extAttributes == null) {
 			return null;
 		}
 		else {
-			return this.extAttributes.get(attrKey);
+			return extAttributes.get(attrKey);
 		}
 	}
 
 	@Override
 	public LA_Object getParent() {
-		return this.parent;
+		if (parent == null) {
+			parent = MongoDB_ObjectDataProvider.getLearningObjectParent(objectID);
+		}
+		return parent;
 	}
 
 	@Override
 	public List<LA_Object> getChildren() {
-		return this.children;
+		if (children == null) {
+			children = MongoDB_ObjectDataProvider.getChildrenByParentID(objectID);
+		}
+		return children;
 	}
 }

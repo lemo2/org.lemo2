@@ -16,7 +16,7 @@ import com.mongodb.DBObject;
 
 public class MongoDB_Person implements LA_Person {
 	
-	private Integer personID;
+	private int personID;
 	private String name;
 	private String descriptor;
 	private Map<String, String> extAttributes;
@@ -24,12 +24,11 @@ public class MongoDB_Person implements LA_Person {
 	
 	public MongoDB_Person(DBObject personDBObject) {
 		this.descriptor = Integer.toString(hashCode());
-		this.personID = (Integer) personDBObject.get("_id");
+		this.personID = (int) personDBObject.get("_id");
 		this.name = (String) personDBObject.get("name");
 		this.descriptor = Integer.toString(hashCode());
 		
 		// initialize person
-		extractActivities(personDBObject);
 		extractExtentions(personDBObject);
 		
 		initialize();
@@ -37,17 +36,6 @@ public class MongoDB_Person implements LA_Person {
 	
 	private void initialize() {
 		MongoDB_PersonDataProvider.initializePerson(this.personID, this);
-	}
-	
-	/**
-	 * Extract person activities
-	 * @param dbObject
-	 */
-	private void extractActivities(DBObject personDBObject) {
-		List<Integer> activities = (List<Integer>) personDBObject.get("learningActivities");
-		
-		List<LA_Activity> personActivities = MongoDB_ActivityDataProvider.getActivitiesByIDList(activities);
-		this.personActivities = personActivities;
 	}
 	
 	/**
@@ -70,28 +58,32 @@ public class MongoDB_Person implements LA_Person {
 		}
 	}
 	
+	public int getID() {
+		return personID;
+	}
+	
 	@Override
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	@Override
 	public String getDescriptor() {
-		return this.descriptor;
+		return descriptor;
 	}
 
 	@Override
 	public Set<String> extAttributes() {
-		return this.extAttributes();
+		return extAttributes();
 	}
 
 	@Override
 	public String getExtAttribute(String attr) {
-		if (this.extAttributes == null) {
+		if (extAttributes == null) {
 			return null;
 		}
 		else {
-			return this.extAttributes.get(attr);
+			return extAttributes.get(attr);
 		}
 	}
 	
@@ -100,7 +92,10 @@ public class MongoDB_Person implements LA_Person {
 	 * @return
 	 */
 	public List<LA_Activity> getPersonActivities() {
-		return this.personActivities;
+		if (personActivities == null) {
+			personActivities = MongoDB_PersonDataProvider.getPersonActivities(personID);
+		}
+		return personActivities;
 	}
 	
 }

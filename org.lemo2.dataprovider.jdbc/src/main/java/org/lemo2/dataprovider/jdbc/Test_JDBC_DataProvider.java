@@ -9,7 +9,10 @@ public class Test_JDBC_DataProvider {
 	public static void main(String[] args) {
 		DataProvider dp = new JDBC_DataProvider();
 		for ( LA_Context context : dp.getCourses() ) {
-			printContext((JDBC_Context) context, "");
+			if (context.getName().equals("Mathematik Online-Kurs - Mathematisch denken!")) {
+				System.out.println("Test");
+				printContext((JDBC_Context) context, "");
+			}
 		}
 	}
 	

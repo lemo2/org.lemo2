@@ -43,13 +43,13 @@ public interface LA_Activity {
 		
 	/**
 	 * 
-	 * @return learning object referenced by this activity
+	 * @return learning object referenced by this activity, or null
 	 */
 	public LA_Object getObject();
 	
 	/**
 	 * 
-	 * @return person referenced by this activity
+	 * @return person referenced by this activity, or null
 	 */
 	public LA_Person getPerson();
 	

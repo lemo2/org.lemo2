@@ -38,7 +38,7 @@ public interface LA_Context {
 	
 	/**
 	 * 
-	 * @return children contexts, or null
+	 * @return children contexts
 	 */
 	public List<LA_Context> getChildren();
 	
@@ -79,19 +79,20 @@ public interface LA_Context {
 	public List<LA_Person> getAllInstructors();
 	
 	/**
-	 * 
+	 * learning activities are sorted by time
 	 * @return learning activities attached to this context
 	 */
 	public List<LA_Activity> getActivities();
 	
 	/**
-	 * 
+	 * learning activities are sorted by time
 	 * @return learning activities attached to this context, or to any context within the child tree
 	 */
 	public List<LA_Activity> getAllActivities();
 	
 	/**
-	 * learning activities are filtered by person and learning object they refer to,
+	 * learning activities are sorted by time
+	 * and filtered by person and learning object they refer to,
 	 * null values are interpreted as wild cards
 	 * @param person referenced by learning activity
 	 * @param obj learning object referenced by learning activity
@@ -100,7 +101,8 @@ public interface LA_Context {
 	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj);
 	
 	/**
-	 * learning activities are filtered by person and learning object they refer to,
+	 * learning activities are sorted by time
+	 * and filtered by person and learning object they refer to,
 	 * null values are interpreted as wild cards
 	 * @param person referenced by learning activity
 	 * @param obj learning object referenced by learning activity
@@ -109,7 +111,8 @@ public interface LA_Context {
 	public List<LA_Activity> getAllActivities(LA_Person person, LA_Object obj);
 	
 	/**
-	 * learning activities are filtered by person and learning object they refer to,
+	 * learning activities are sorted by time
+	 * and filtered by person and learning object they refer to,
 	 * null values are interpreted as wild cards
 	 * @param person referenced by learning activity
 	 * @param obj learning object referenced by learning activity
@@ -120,7 +123,8 @@ public interface LA_Context {
 	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj, long start, long end);
 	
 	/**
-	 * learning activities are filtered by person and learning object they refer to,
+	 * learning activities are sorted by time
+	 * and filtered by person and learning object they refer to,
 	 * null values are interpreted as wild cards
 	 * @param person referenced by learning activity
 	 * @param obj learning object referenced by learning activity

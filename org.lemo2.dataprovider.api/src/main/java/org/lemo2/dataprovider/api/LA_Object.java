@@ -44,7 +44,7 @@ public interface LA_Object {
 	
 	/**
 	 * 
-	 * @return children objects, or null
+	 * @return children objects
 	 */
 	public List<LA_Object> getChildren();
 

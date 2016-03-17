@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.lemo2.dataprovider.api.LA_Activity;
+import org.lemo2.dataprovider.api.LA_Person;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Object;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Person;
 
 import com.mongodb.BasicDBObject;
@@ -21,6 +23,20 @@ public class MongoDB_PersonDataProvider {
 	
 	public static void initializePerson(Integer personID, MongoDB_Person person) {
 		INITIALIZED_PERSONS.put(personID, person);
+	}
+	
+	/*
+	 * FOR TEST
+	 */
+	public static void clearInitializedPersons() {
+		INITIALIZED_PERSONS.clear();
+	}
+	
+	/*
+	 * FOR TEST
+	 */
+	public static int getSizeOfInitializedPersons() {
+		return INITIALIZED_PERSONS.size();
 	}
 	
 	public static MongoDB_Person getPersonByID(Integer personID) {	
@@ -41,6 +57,44 @@ public class MongoDB_PersonDataProvider {
 		}
 		
 		return person;
+	}
+	
+	/**
+	 * Returns all persons with the IDs in the given list. 
+	 * @param personIDs
+	 * @return
+	 */
+	public static List<LA_Person> getPersonsByIDList(List<Integer> personIDs) {	
+		List<LA_Person> persons = new ArrayList<LA_Person>();
+		List<Integer> tmpIDs = new ArrayList<Integer>();
+		
+		MongoDB_Person person;
+		
+		// Load initialized persons
+		for (int personID : personIDs) {
+			person = INITIALIZED_PERSONS.get(personID); 
+			if (person != null) {
+				persons.add(person);
+			}
+			else {
+				tmpIDs.add(personID);
+			}
+		}
+		
+		// load all persons which are not yet initialized
+		DBCollection collection = MongoDB_Connector.connectToPersonCollection();
+		
+		BasicDBObject query = new BasicDBObject();
+		query.put("_id", new BasicDBObject("$in", tmpIDs));
+		
+		DBCursor cursor = collection.find(query);
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			person = createPersonObject(dbObj);
+			persons.add(person);
+		}
+		
+		return persons;
 	}
 	
 	/**

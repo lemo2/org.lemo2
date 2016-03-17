@@ -74,7 +74,10 @@ public class MongoDB_Person implements LA_Person {
 
 	@Override
 	public Set<String> extAttributes() {
-		return extAttributes();
+		if (extAttributes == null) {
+			return null;
+		}
+		return extAttributes.keySet();
 	}
 
 	@Override

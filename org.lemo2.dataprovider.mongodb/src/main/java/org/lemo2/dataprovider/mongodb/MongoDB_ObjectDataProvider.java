@@ -22,6 +22,20 @@ public class MongoDB_ObjectDataProvider {
 		INITIALIZED_OBJECTS.put(objectID, lObject);
 	}
 	
+	/*
+	 * FOR TEST
+	 */
+	public static void clearInitializedLearningObjects() {
+		INITIALIZED_OBJECTS.clear();
+	}
+	
+	/*
+	 * FOR TEST
+	 */
+	public static int getSizeOfInitializedLearningObjects() {
+		return INITIALIZED_OBJECTS.size();
+	}
+	
 	// For test
 	public static List<Integer> getAllLearningObjectIDs() {
 		DBCollection collection = MongoDB_Connector.connectToObjectCollection();

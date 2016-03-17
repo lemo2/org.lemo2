@@ -35,16 +35,19 @@ public class MongoDB_Activity implements LA_Activity {
 	
 	public MongoDB_Activity(DBObject activityObject) {
 		this.activityID = (int) activityObject.get("_id");
-		int tmpTime = (int) activityObject.get("time");
-		this.time = tmpTime;
+		Integer tmpTime = (Integer) activityObject.get("time");
+		if (tmpTime != null) {
+			this.time = (int) tmpTime;
+		}
 		this.action = (String) activityObject.get("action");
 		this.info = (String) activityObject.get("info");
 		
-		extractExtensions(activityObject);
+		//extractExtensions(activityObject);
+		/*
 		extractReference(activityObject);
 		extractLearningObject(activityObject);
 		extractPerson(activityObject);
-
+		*/
 		initialize();
 	}
 	
@@ -156,6 +159,9 @@ public class MongoDB_Activity implements LA_Activity {
 
 	@Override
 	public LA_Person getPerson() {
+		if (activityPerson == null) {
+			activityPerson = MongoDB_ActivityDataProvider.getPersonOfActivity(activityID);
+		}
 		return activityPerson;
 	}
 

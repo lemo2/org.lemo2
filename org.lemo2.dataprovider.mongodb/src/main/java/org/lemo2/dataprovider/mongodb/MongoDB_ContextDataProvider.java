@@ -4,17 +4,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.bson.BSONObject;
+import org.bson.Document;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context2;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Person;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
 
 public class MongoDB_ContextDataProvider {
 
@@ -22,6 +29,28 @@ public class MongoDB_ContextDataProvider {
 	
 	public static void initializeContext(Integer contextID, MongoDB_Context context) {
 		INITIALIZED_CONTEXTS.put(contextID, context);
+	}
+	
+	// TEST
+	public static List<Integer> getInitializedIDs() {
+		List<Integer> idList = new ArrayList<Integer>();
+		idList.addAll(INITIALIZED_CONTEXTS.keySet());
+		
+		return idList;
+	}
+	
+	/*
+	 * FOR TEST
+	 */
+	public static void clearInitializedContexts() {
+		INITIALIZED_CONTEXTS.clear();
+	}
+	
+	/*
+	 * FOR TEST
+	 */
+	public static int getSizeOfInitializedContexts() {
+		return INITIALIZED_CONTEXTS.size();
 	}
 	
 	public static LA_Context getContextByID(Integer contextID) {
@@ -42,6 +71,28 @@ public class MongoDB_ContextDataProvider {
 		}
 		
 		return context;
+	}
+	
+	// TODO - NullPointer-ExceptionHandling bei result.get(..)
+	public static int countContextActivities(Integer contextID) {
+		DBCollection collection = MongoDB_Connector.connectToContextCollection();
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		
+		idQuery.put("_id", contextID);
+		select.put("learningActivities", 1); // just return 'learningActivities' field
+		
+		DBObject result = collection.findOne(idQuery, select);
+		
+		try {
+			List<Integer> activityIDs = (List<Integer>) result.get("learningActivities");
+			return activityIDs.size();
+		}
+		catch (NullPointerException exc) {
+			return 0;
+		}
+
 	}
 	
 	/**
@@ -82,6 +133,23 @@ public class MongoDB_ContextDataProvider {
 		return objectIDs;
 	}
 	
+	public static List<LA_Context> getAllCourses2() {
+		List<LA_Context> courses = new ArrayList<LA_Context>();
+
+		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
+		
+		// use no query, so all contexts will be returned
+		DBCursor cursor = contextCollection.find();
+
+		while (cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			MongoDB_Context course = createContextObject(dbObj);
+
+			courses.add(course);
+		}
+	
+		return courses;
+	}
 	
 	public static List<LA_Context> getAllCourses() {
 		List<LA_Context> courses = new ArrayList<LA_Context>();
@@ -91,12 +159,11 @@ public class MongoDB_ContextDataProvider {
 		BasicDBObject parentNullQuery = new BasicDBObject();
 		parentNullQuery.put("parent", 0);
 		
-		// iterate database results
+		// load data from query
 		DBCursor cursor = contextCollection.find(parentNullQuery);
 
 		while (cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
-			Integer contextID = (Integer) dbObj.get("_id");
 			
 			// Create parent object and its children
 			MongoDB_Context course = createContextObject(dbObj);
@@ -108,6 +175,24 @@ public class MongoDB_ContextDataProvider {
 		}
 	
 		return courses;
+	}
+	
+	/**
+	 * JUST FOR TEST
+	 * Returns recursively all children and their subsequent children of the given context.
+	 * @param context
+	 * @param children
+	 * @return
+	 */
+	public static List<LA_Context> getChildrenTreeOfContext(MongoDB_Context2 context, List<LA_Context> children)
+	{
+	   for( LA_Context child : getFirstDegreeChildrenOfContext(context.getID()) )
+	   {
+		   MongoDB_Context mChild = (MongoDB_Context) child;
+		   children.add(child);
+		   getChildrenTreeOfContext(mChild, children);
+	   }
+	   return children;
 	}
 	
 	/**
@@ -152,32 +237,29 @@ public class MongoDB_ContextDataProvider {
 		return contextChildren;
 	}
 	
-	// Überarbeiten!!!!
+	// TODO: TESTDATEN EINFÜGEN --> LOGIN-ID AS EXTENTION
 	public static List<LA_Context> getCoursesByInstructor(String loginID) {
 		List<LA_Context> courses = new ArrayList<LA_Context>();
+		
+		// returns the person which has the given login ID as extention
 		MongoDB_Person person = MongoDB_PersonDataProvider.getPersonByLoginID(loginID);
 		
-		Integer instructorID = Integer.valueOf(loginID);
-		
-		// find all courses
-		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
-		BasicDBObject instructorQuery = new BasicDBObject();
-		
 		if (person != null) {
+			// find all courses
+			DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
+			BasicDBObject instructorQuery = new BasicDBObject();
+			
 			instructorQuery.put("persons.person_id", person.getID());
 			instructorQuery.put("persons.role", "instructor");
-		}
-		else {
-			
-		}
 		
-		// iterate instructor courses
-		DBCursor cursor = contextCollection.find(instructorQuery);
-		while (cursor.hasNext()) {
-			DBObject obj = cursor.next();
-			MongoDB_Context course = createContextObject(obj);
-			
-			courses.add(course);
+			// iterate instructor courses
+			DBCursor cursor = contextCollection.find(instructorQuery);
+			while (cursor.hasNext()) {
+				DBObject obj = cursor.next();
+				MongoDB_Context course = createContextObject(obj);
+				
+				courses.add(course);
+			}
 		}
 		
 		return courses;
@@ -191,19 +273,35 @@ public class MongoDB_ContextDataProvider {
 	 */
 	public static List<LA_Person> getContextStudents(Integer contextID) {
 		List<LA_Person> students = new ArrayList<LA_Person>();
+		List<Integer> personIDs = new ArrayList<Integer>();
 		
 		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
-		BasicDBObject selectQuery = new BasicDBObject();
-		selectQuery.put("context", contextID);
-		selectQuery.put("persons.role", "student");
+		BasicDBObject query = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
 		
-		// iterate students
-		DBCursor cursor = contextCollection.find(selectQuery);
-		while (cursor.hasNext()) {
-			DBObject dbObj = cursor.next();
-			MongoDB_Person person = MongoDB_PersonDataProvider.createPersonObject(dbObj);
+		query.put("_id", contextID);
+		//query.put("persons.role", "student");
+		select.put("persons", 1); // just return 'person_id' field
+		
+		// iterate results
+		DBObject result = contextCollection.findOne(query, select);
+		
+		try {
+			List<DBObject> personsResult = (List<DBObject>) result.get("persons");
 			
-			students.add(person);
+			// get person ids
+			for (DBObject dbObj : personsResult) {
+				String role = (String) dbObj.get("role");
+				if (role.equals("student")) {
+					int pID = (int) dbObj.get("person_id");
+					personIDs.add(pID);
+				}
+			}
+			
+			students = MongoDB_PersonDataProvider.getPersonsByIDList(personIDs);
+		}
+		catch(NullPointerException exc) {
+			exc.printStackTrace();
 		}
 		
 		return students;
@@ -217,24 +315,45 @@ public class MongoDB_ContextDataProvider {
 	 */
 	public static List<LA_Person> getContextInstructors(Integer contextID) {
 		List<LA_Person> instructors = new ArrayList<LA_Person>();
+		List<Integer> personIDs = new ArrayList<Integer>();
 		
 		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
-		BasicDBObject selectQuery = new BasicDBObject();
-		selectQuery.put("context", contextID);
-		selectQuery.put("persons.role", "instructor");
+		BasicDBObject query = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
 		
-		// iterate students
-		DBCursor cursor = contextCollection.find(selectQuery);
-		while (cursor.hasNext()) {
-			DBObject dbObj = cursor.next();
-			MongoDB_Person person = MongoDB_PersonDataProvider.createPersonObject(dbObj);
+		query.put("_id", contextID);
+		//query.put("persons.role", new BasicDBObject("$eq", "instructor"));
+		select.put("persons", 1); // just return 'person_id' field
+		
+		// iterate results
+		DBObject result = contextCollection.findOne(query, select);
+		
+		try {
+			List<DBObject> personsResult = (List<DBObject>) result.get("persons");
 			
-			instructors.add(person);
+			// get person ids
+			for (DBObject dbObj : personsResult) {
+				String role = (String) dbObj.get("role");
+				if (role.equals("instructor")) {
+					int pID = (int) dbObj.get("person_id");
+					personIDs.add(pID);
+				}
+			}
+			
+			instructors = MongoDB_PersonDataProvider.getPersonsByIDList(personIDs);
 		}
+		catch(NullPointerException exc) {}
 		
 		return instructors;
 	}
 	
+	/**
+	 * Return all learning objects of the given learning context.
+	 * Read all learning object IDs of the given context and load the learning objects
+	 * from their collection.
+	 * @param contextID
+	 * @return
+	 */
 	public static List<LA_Object> getContextLearningObjects(Integer contextID) {
 		List<LA_Object> learningObjects = new ArrayList<LA_Object>();
 		List<Integer> lObjectIDs = new ArrayList<Integer>();
@@ -244,7 +363,7 @@ public class MongoDB_ContextDataProvider {
 		BasicDBObject select = new BasicDBObject();
 		
 		idQuery.put("_id", contextID);
-		select.put("learningObjects", 1); // just return 'learningActivities' field
+		select.put("learningObjects", 1); // just return 'learningObjects' field
 		
 		DBObject result = contextCollection.findOne(idQuery, select);
 		
@@ -254,6 +373,11 @@ public class MongoDB_ContextDataProvider {
 		return learningObjects;
 	}
 	
+	/**
+	 * Returns a context which was already initialized which has the given descriptor.
+	 * @param descriptor
+	 * @return
+	 */
 	public static MongoDB_Context getContextByDescriptor(String descriptor) {
 
 		for (MongoDB_Context context : INITIALIZED_CONTEXTS.values()) {

@@ -1,10 +1,11 @@
 package org.lemo2.dataprovider.mongodb;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lemo2.dataprovider.api.LA_Activity;
@@ -12,9 +13,7 @@ import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
 
-public class MongoDB_ActivityTest {
-
-	private static MongoDB_DataProvider dataProvider;
+public class MongoDB_ContextActivityTest {
 	
 	private int contextID = 206;
 	private int objectID = 142423;
@@ -22,6 +21,7 @@ public class MongoDB_ActivityTest {
 	
 	@BeforeClass
 	public static void setUp() throws Exception {
+		MongoDB_DataProvider dataProvider;
 		String database = "iversity";
 		String host = "localhost";
 		int port = 27017;
@@ -31,28 +31,58 @@ public class MongoDB_ActivityTest {
 	}
 	
 	private void clearData() {
-		MongoDB_ActivityDataProvider.clearInitializedActivities();
-		MongoDB_ContextDataProvider.clearInitializedContexts();
+		MongoDB_ActivityDataProvider2.clearInitializedActivities();
+		MongoDB_ContextDataProvider2.clearInitializedContexts();
 		MongoDB_PersonDataProvider.clearInitializedPersons();
 		MongoDB_ObjectDataProvider.clearInitializedLearningObjects();
 	}
 	
-	//@Test
-	public void getAllActivityIDsTest() {
+	@Test
+	public void getActivities_NewProviderTest() {
 		clearData();
 		
-		List<Integer> activities = new ArrayList<Integer>();
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		
 		long start = System.currentTimeMillis();
-		activities = MongoDB_ActivityDataProvider.getAllLearningActivityIDs();
 		
+		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
+		
+		assertNotNull(context);
+		activities = context.getActivities();
+
 		long end = System.currentTimeMillis();
 		long duration = end - start;
 		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
 		
 		System.out.println("-----------------------------------------");
-		System.out.println("Activity-IDs size: " + activities.size());
-		System.out.println("Seconds - get all activity IDs: " + secDuration + " ms");
+		System.out.println("Size - (new provider) get activities of context: " + activities.size());
+		System.out.println("Seconds - (new provider) get activities of context '" + 
+				context.getName() + "' : " + secDuration + " ms");
+		
+	}
+	
+	@Test
+	public void getActivities_OriginalProviderTest() {
+		clearData();
+		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		long start = System.currentTimeMillis();
+		
+		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
+		
+		assertNotNull(context);
+		activities = context.getActivities();
+
+		long end = System.currentTimeMillis();
+		long duration = end - start;
+		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
+		
+		System.out.println("-----------------------------------------");
+		System.out.println("Size - (original provider) get activities of context: " + activities.size());
+		System.out.println("Seconds - (original provider) get activities of context '" + 
+				context.getName() + "' : " + secDuration + " ms");
+		
 	}
 	
 	@Test
@@ -109,9 +139,10 @@ public class MongoDB_ActivityTest {
 		
 		long start = System.currentTimeMillis();
 		
+		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
 		LA_Object lObject = MongoDB_ObjectDataProvider.getLearningObjectByID(objectID);
 		
-		activities = MongoDB_ActivityDataProvider.getActivities(lObject);
+		activities = context.getActivities(null, lObject);
 
 		long end = System.currentTimeMillis();
 		long duration = end - start;
@@ -135,7 +166,7 @@ public class MongoDB_ActivityTest {
 		
 		long start = System.currentTimeMillis();
 		
-		LA_Context context = MongoDB_ContextDataProvider.getContextByID(contextID);
+		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
 		LA_Object lObject = MongoDB_ObjectDataProvider.getLearningObjectByID(objectID);
 		
 		activities = context.getActivities(null, lObject, activityStart, activityEnd);
@@ -162,8 +193,11 @@ public class MongoDB_ActivityTest {
 		
 		long start = System.currentTimeMillis();
 		
-		LA_Context context = MongoDB_ContextDataProvider.getContextByID(contextID);
+		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
 		LA_Person person = MongoDB_PersonDataProvider.getPersonByID(personID);
+		
+		assertNotNull(context);
+		assertNotNull(person);
 		
 		activities = context.getActivities(person, null, activityStart, activityEnd);
 
@@ -188,7 +222,7 @@ public class MongoDB_ActivityTest {
 		
 		long start = System.currentTimeMillis();
 		
-		LA_Context context = MongoDB_ContextDataProvider.getContextByID(contextID);
+		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
 		
 		activities = context.getActivities(null, null, activityStart, activityEnd);
 
@@ -201,4 +235,5 @@ public class MongoDB_ActivityTest {
 				"': Size of activities by timerange: " + activities.size());
 		System.out.println("Seconds - get activities for timerange: " + secDuration + " ms");
 	}
+
 }

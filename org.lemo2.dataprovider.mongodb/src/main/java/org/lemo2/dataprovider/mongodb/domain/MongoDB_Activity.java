@@ -42,12 +42,9 @@ public class MongoDB_Activity implements LA_Activity {
 		this.action = (String) activityObject.get("action");
 		this.info = (String) activityObject.get("info");
 		
-		//extractExtensions(activityObject);
-		/*
-		extractReference(activityObject);
-		extractLearningObject(activityObject);
-		extractPerson(activityObject);
-		*/
+		extractExtensions(activityObject);
+		// extract
+		
 		initialize();
 	}
 	

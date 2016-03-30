@@ -159,18 +159,18 @@ public class MongoDB_Context2 implements LA_Context {
 	}
 
 	@Override
-	public List<LA_Activity> getActivitiesRecursive() {
+	public List<LA_Activity> getAllActivities() {
 		return MongoDB_ActivityDataProvider2.getActivitiesRecursive(this);
 	}
 
 	@Override
-	public List<LA_Activity> getActivitiesRecursive(LA_Person person,
+	public List<LA_Activity> getAllActivities(LA_Person person,
 			LA_Object obj) {
 		return MongoDB_ActivityDataProvider2.getActivitiesRecursive(this, person, obj);
 	}
 
 	@Override
-	public List<LA_Activity> getActivitiesRecursive(LA_Person person,
+	public List<LA_Activity> getAllActivities(LA_Person person,
 			LA_Object obj, long start, long end) {
 		return MongoDB_ActivityDataProvider2.getActivitiesRecursive(this, person, obj, start, end);
 	}
@@ -214,6 +214,24 @@ public class MongoDB_Context2 implements LA_Context {
 		Set<LA_Activity> setActivities = new HashSet<LA_Activity>(contextActivities);
 		contextActivities.clear();
 		contextActivities.addAll(setActivities);
+	}
+
+	@Override
+	public List<LA_Object> getAllObjects() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<LA_Person> getAllStudents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<LA_Person> getAllInstructors() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -118,7 +118,7 @@ public class MongoDB_ContextActivityTest {
 		
 		LA_Context context = MongoDB_ContextDataProvider2.getContextByID(contextID);
 		
-		activities = context.getActivitiesRecursive();
+		activities = context.getAllActivities();
 
 		long end = System.currentTimeMillis();
 		long duration = end - start;

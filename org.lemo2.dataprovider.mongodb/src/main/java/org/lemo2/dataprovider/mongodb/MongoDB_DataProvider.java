@@ -2,6 +2,7 @@ package org.lemo2.dataprovider.mongodb;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.lemo2.dataprovider.api.DataProvider;
 import org.lemo2.dataprovider.api.LA_Activity;
@@ -12,12 +13,12 @@ import org.lemo2.dataprovider.api.LA_Person;
 public class MongoDB_DataProvider implements DataProvider {
 	
 	@Override
-	public List<LA_Context> getCourses() {
+	public Set<LA_Context> getCourses() {
 		return MongoDB_ContextDataProvider.getAllCourses();
 	}
 
 	@Override
-	public List<LA_Context> getCoursesByInstructor(String userId) {
+	public Set<LA_Context> getCoursesByInstructor(String userId) {
 		return MongoDB_ContextDataProvider.getCoursesByInstructor(userId);
 	}
 
@@ -26,12 +27,10 @@ public class MongoDB_DataProvider implements DataProvider {
 		return MongoDB_ContextDataProvider.getContextByDescriptor(descriptor);
 	}
 
-	@Override
 	public LA_Person getPerson(String descriptor) {	
 		return MongoDB_PersonDataProvider.getPersonByDescriptor(descriptor);
 	}
 
-	@Override
 	public LA_Object getObject(String descriptor) {
 		return MongoDB_ObjectDataProvider.getObjectByDescriptor(descriptor);
 	}

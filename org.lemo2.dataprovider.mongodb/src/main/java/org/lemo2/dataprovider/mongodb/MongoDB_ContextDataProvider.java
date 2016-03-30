@@ -2,6 +2,7 @@ package org.lemo2.dataprovider.mongodb;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +74,6 @@ public class MongoDB_ContextDataProvider {
 		return context;
 	}
 	
-	// TODO - NullPointer-ExceptionHandling bei result.get(..)
 	public static int countContextActivities(Integer contextID) {
 		DBCollection collection = MongoDB_Connector.connectToContextCollection();
 		
@@ -133,8 +133,8 @@ public class MongoDB_ContextDataProvider {
 		return objectIDs;
 	}
 	
-	public static List<LA_Context> getAllCourses2() {
-		List<LA_Context> courses = new ArrayList<LA_Context>();
+	public static Set<LA_Context> getAllCourses() {
+		Set<LA_Context> courses = new HashSet<LA_Context>();
 
 		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
 		
@@ -146,32 +146,6 @@ public class MongoDB_ContextDataProvider {
 			MongoDB_Context course = createContextObject(dbObj);
 
 			courses.add(course);
-		}
-	
-		return courses;
-	}
-	
-	public static List<LA_Context> getAllCourses() {
-		List<LA_Context> courses = new ArrayList<LA_Context>();
-		
-		// find all parent courses
-		DBCollection contextCollection = MongoDB_Connector.connectToContextCollection();
-		BasicDBObject parentNullQuery = new BasicDBObject();
-		parentNullQuery.put("parent", 0);
-		
-		// load data from query
-		DBCursor cursor = contextCollection.find(parentNullQuery);
-
-		while (cursor.hasNext()) {
-			DBObject dbObj = cursor.next();
-			
-			// Create parent object and its children
-			MongoDB_Context course = createContextObject(dbObj);
-			List<LA_Context> children = new ArrayList<LA_Context>();
-			children = getChildrenTreeOfContext(course, children);
-
-			courses.add(course);
-			courses.addAll(children);
 		}
 	
 		return courses;
@@ -238,8 +212,8 @@ public class MongoDB_ContextDataProvider {
 	}
 	
 	// TODO: TESTDATEN EINFÜGEN --> LOGIN-ID AS EXTENTION
-	public static List<LA_Context> getCoursesByInstructor(String loginID) {
-		List<LA_Context> courses = new ArrayList<LA_Context>();
+	public static Set<LA_Context> getCoursesByInstructor(String loginID) {
+		Set<LA_Context> courses = new HashSet<LA_Context>();
 		
 		// returns the person which has the given login ID as extention
 		MongoDB_Person person = MongoDB_PersonDataProvider.getPersonByLoginID(loginID);
@@ -263,6 +237,31 @@ public class MongoDB_ContextDataProvider {
 		}
 		
 		return courses;
+	}
+	
+	/**
+	 * Returns the students of the given contexts and its children tree.
+	 * @param context
+	 * @return
+	 */
+	public static List<LA_Person> getAllStudents(MongoDB_Context context) {
+		List<LA_Person> students = new ArrayList<LA_Person>();
+		List<LA_Context> children = new ArrayList<LA_Context>();
+		
+		Set<LA_Person> studentSet = new HashSet<LA_Person>();
+		
+		children = getChildrenTreeOfContext(context, children);
+		studentSet.addAll(context.getStudents());
+		
+		for (LA_Context child : children) {
+			studentSet.addAll(child.getStudents());
+		}
+		
+		// Set was used to remove duplicates
+		students.addAll(studentSet);
+		studentSet.clear();
+		
+		return students;
 	}
 	
 	/**
@@ -308,6 +307,31 @@ public class MongoDB_ContextDataProvider {
 	}
 	
 	/**
+	 * Returns the instructors of the given contexts and its children tree.
+	 * @param context
+	 * @return
+	 */
+	public static List<LA_Person> getAllInstructors(MongoDB_Context context) {
+		List<LA_Person> instructors = new ArrayList<LA_Person>();
+		List<LA_Context> children = new ArrayList<LA_Context>();
+		
+		Set<LA_Person> instructorSet = new HashSet<LA_Person>();
+		
+		children = getChildrenTreeOfContext(context, children);
+		instructorSet.addAll(context.getInstructors());
+		
+		for (LA_Context child : children) {
+			instructorSet.addAll(child.getInstructors());
+		}
+		
+		// Set was used to remove duplicates
+		instructors.addAll(instructorSet);
+		instructorSet.clear();
+		
+		return instructors;
+	}
+	
+	/**
 	 * Returns all persons with the role 'instructor' which participates in the
 	 * course with the given context id.
 	 * @param contextID
@@ -345,6 +369,31 @@ public class MongoDB_ContextDataProvider {
 		catch(NullPointerException exc) {}
 		
 		return instructors;
+	}
+	
+	/**
+	 * Returns all learning objects attached to this context and to any context within the child tree
+	 * @param context
+	 * @return
+	 */
+	public static List<LA_Object> getAllLearningObjects(MongoDB_Context context) {
+		List<LA_Object> lObjects = new ArrayList<LA_Object>();
+		List<LA_Context> children = new ArrayList<LA_Context>();
+		
+		Set<LA_Object> lObjectSet = new HashSet<LA_Object>();
+		
+		children = getChildrenTreeOfContext(context, children);
+		lObjectSet.addAll(context.getObjects());
+		
+		for (LA_Context child : children) {
+			lObjectSet.addAll(child.getObjects());
+		}
+		
+		// Set was used to remove duplicates
+		lObjects.addAll(lObjectSet);
+		lObjectSet.clear();
+		
+		return lObjects;
 	}
 	
 	/**

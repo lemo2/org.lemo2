@@ -86,7 +86,7 @@ public class ThreadDemo implements Runnable {
 	   }
 	
 	private void loadAllCourses() {
-		MongoDB_ContextDataProvider.getAllCourses2();
+		MongoDB_ContextDataProvider.getAllCourses();
 	}
 	
 	private void loadCourse(Integer contextID) {

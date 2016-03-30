@@ -183,7 +183,7 @@ public class MongoDB_ActivityDataProvider {
 		MongoDB_Context mContext = (MongoDB_Context) context;
 		
 		List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(mContext.getID());
-		activities = MongoDB_ActivityDataProvider.getActivitiesByIDList_Test(activityIDs);
+		activities = MongoDB_ActivityDataProvider.getActivitiesByIDList_DBObjects(activityIDs);
 		
 		return activities;
 	}
@@ -280,7 +280,7 @@ public class MongoDB_ActivityDataProvider {
 		return activities;
 	}
 	
-	public static List<LA_Activity> getActivitiesRecursive(MongoDB_Context context) {
+	public static List<LA_Activity> getAllActivities(MongoDB_Context context) {
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		List<LA_Context> contextTree = new ArrayList<LA_Context>();
 		
@@ -296,7 +296,7 @@ public class MongoDB_ActivityDataProvider {
 		return activities;
 	}
 
-	public static List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj) {
+	public static List<LA_Activity> getAllActivities(LA_Person person, LA_Object obj) {
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		List<MongoDB_Object> objectTree = new ArrayList<MongoDB_Object>();
 		
@@ -320,7 +320,7 @@ public class MongoDB_ActivityDataProvider {
 		return activities;
 	}
 
-	public static List<LA_Activity> getActivitiesRecursive(LA_Person person, LA_Object obj, 
+	public static List<LA_Activity> getAllActivities(LA_Person person, LA_Object obj, 
 			long start, long end) {
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		List<MongoDB_Object> objectTree = new ArrayList<MongoDB_Object>();
@@ -351,12 +351,14 @@ public class MongoDB_ActivityDataProvider {
 		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
 		
 		BasicDBObject selectQuery = new BasicDBObject();
+		BasicDBObject sortQuery = new BasicDBObject();
 		
 		selectQuery.put("person", person.getID());
 		selectQuery.put("learningObject", obj.getID());
 		selectQuery.put("time", buildTimeRangeQuery(start, end));
+		sortQuery.put("time", 1);
 		
-	    DBCursor cursor = collection.find(selectQuery);
+	    DBCursor cursor = collection.find(selectQuery).sort(sortQuery);
 	    
 	    while(cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
@@ -382,10 +384,13 @@ public class MongoDB_ActivityDataProvider {
 		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
 		
 		BasicDBObject selectQuery = new BasicDBObject();
+		BasicDBObject sortQuery = new BasicDBObject();
 		
 		selectQuery.put("time", buildTimeRangeQuery(start, end));
-			selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
-	    DBCursor cursor = collection.find(selectQuery);
+		selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
+		sortQuery.put("time", 1);
+		
+	    DBCursor cursor = collection.find(selectQuery).sort(sortQuery);
 	    
 	    while(cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
@@ -459,12 +464,14 @@ public class MongoDB_ActivityDataProvider {
 		List<Integer> objectIDs = MongoDB_ContextDataProvider.getContextLearningObjectIDs(context.getID());
 		
 		BasicDBObject selectQuery = new BasicDBObject();
+		BasicDBObject sortQuery = new BasicDBObject();
 
 		selectQuery.put("person", person.getID());
 		selectQuery.put("learningObject", new BasicDBObject("$in", objectIDs));
 		selectQuery.put("time", buildTimeRangeQuery(start, end));
-	    
-	    DBCursor cursor = collection.find(selectQuery);
+	    sortQuery.put("time", 1);
+		
+	    DBCursor cursor = collection.find(selectQuery).sort(sortQuery);
 	    
 	    while(cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
@@ -502,10 +509,13 @@ public class MongoDB_ActivityDataProvider {
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		
 		BasicDBObject selectQuery = new BasicDBObject();
+		BasicDBObject sortQuery = new BasicDBObject();
+		
 		selectQuery.put("learningObject", obj.getID());
 		selectQuery.put("time", buildTimeRangeQuery(start, end));
-	    
-	    DBCursor cursor = collection.find(selectQuery);
+	    sortQuery.put("time", 1);
+		
+	    DBCursor cursor = collection.find(selectQuery).sort(sortQuery);
 	    
 	    while(cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
@@ -607,9 +617,7 @@ public class MongoDB_ActivityDataProvider {
 				tmpActivities.add(aID);
 			}
 		}
-		// TODO - Syso löschen, da nur für Tests
-	//	System.out.println("initialized activities: " + activities.size());
-	//	System.out.println("activities not loaded: " + tmpActivities.size());
+		
 		// load activities from database which are not initialized
 		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
 		BasicDBObject selectQuery = new BasicDBObject();
@@ -625,12 +633,9 @@ public class MongoDB_ActivityDataProvider {
 		return activities;
 	}
 	
-	public static List<DBObject> getActivitiesByIDList_Test(List<Integer> activityIDs) {
+	public static List<DBObject> getActivitiesByIDList_DBObjects(List<Integer> activityIDs) {
 		List<DBObject> activities = new ArrayList<DBObject>();
 		
-		// TODO - Syso löschen, da nur für Tests
-	//	System.out.println("initialized activities: " + activities.size());
-	//	System.out.println("activities not loaded: " + tmpActivities.size());
 		// load activities from database which are not initialized
 		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
 		BasicDBObject selectQuery = new BasicDBObject();

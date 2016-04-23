@@ -78,28 +78,6 @@ public class MongoDB_ActivityTest {
 	}
 	
 	//@Test
-	public void getContextActivities2() {
-		clearData();
-		
-		List<LA_Activity> activities = new ArrayList<LA_Activity>();
-		LA_Context context = MongoDB_ContextDataProvider.getContextByID(212741);
-		
-		long start = System.currentTimeMillis();
-		
-		activities = MongoDB_ActivityDataProviderWithConId.getActivities(context);
-
-		long end = System.currentTimeMillis();
-		long duration = end - start;
-		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
-		
-		System.out.println("-----------------------------------------");
-		System.out.println("Context - '" + context.getName() + 
-				"': Size - activities2 of context: " + activities.size());
-		System.out.println("Seconds - get activities2 of context '" + 
-				context.getName() + "' : " + secDuration + " ms");
-	}
-	
-	//@Test
 	public void getContextActivitiesRecursive() {
 		clearData();
 		
@@ -109,29 +87,6 @@ public class MongoDB_ActivityTest {
 		long start = System.currentTimeMillis();
 		
 		activities = context.getAllActivities();
-
-		long end = System.currentTimeMillis();
-		long duration = end - start;
-		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
-		
-		System.out.println("-----------------------------------------");
-		System.out.println("Context - '" + context.getName() + 
-				"': Size - recursive activities of context: " + activities.size());
-		System.out.println("Seconds - get recursive activities of context '" + 
-				context.getName() + "' : " + secDuration + " ms");
-	}
-	
-	@Test
-	public void getContextActivities2Recursive() {
-		clearData();
-		
-		List<LA_Activity> activities = new ArrayList<LA_Activity>();
-		LA_Context context = MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID);
-		MongoDB_Context mContext = (MongoDB_Context) context;
-		
-		long start = System.currentTimeMillis();
-		
-		activities = mContext.getAllActivities2();
 
 		long end = System.currentTimeMillis();
 		long duration = end - start;

@@ -42,13 +42,13 @@ public class MongoDB_ObjectTest {
 	@Test
 	public void initializeAllLearningObjects() {
 		long start = System.currentTimeMillis();
-		List<Integer> objectIDs = MongoDB_ObjectDataProvider.getAllLearningObjectIDs();
+		List<LA_Object> objectIDs = MongoDB_ObjectDataProvider.getAllLearningObjects();
 
 		long end = System.currentTimeMillis();
 		long duration = end - start;
 		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
-		System.out.println("Size of learning object IDs: " + objectIDs.size());
-		System.out.println("Duration - get all learning object IDs " + secDuration + " ms");
+		System.out.println("Size of learning objects: " + objectIDs.size());
+		System.out.println("Duration - get all learning objects " + secDuration + " ms");
 	}
 
 }

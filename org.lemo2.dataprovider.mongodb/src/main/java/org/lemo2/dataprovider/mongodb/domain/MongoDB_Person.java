@@ -8,7 +8,6 @@ import java.util.Set;
 import org.bson.BSONObject;
 import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Person;
-import org.lemo2.dataprovider.mongodb.MongoDB_ActivityDataProvider;
 import org.lemo2.dataprovider.mongodb.MongoDB_PersonDataProvider;
 
 import com.mongodb.BasicDBList;
@@ -20,7 +19,6 @@ public class MongoDB_Person implements LA_Person {
 	private String name;
 	private String descriptor;
 	private Map<String, String> extAttributes;
-	private List<LA_Activity> personActivities;
 	
 	public MongoDB_Person(DBObject personDBObject) {
 		this.descriptor = Integer.toString(hashCode());
@@ -95,10 +93,7 @@ public class MongoDB_Person implements LA_Person {
 	 * @return
 	 */
 	public List<LA_Activity> getPersonActivities() {
-		if (personActivities == null) {
-			personActivities = MongoDB_PersonDataProvider.getPersonActivities(personID);
-		}
-		return personActivities;
+		return MongoDB_PersonDataProvider.getPersonActivities(personID);
 	}
 	
 }

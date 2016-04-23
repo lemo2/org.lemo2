@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lemo2.dataprovider.api.LA_Activity;
@@ -15,6 +14,7 @@ import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
+import org.lemo2.dataprovider.mongodb.domain.MongoDB_Object;
 
 import com.mongodb.DBObject;
 
@@ -68,28 +68,20 @@ public class MongoDB_ContextTest {
 	}
 	
 	//@Test
-	public void getChildrenTreeActivities_noInitializationTest() {
+	public void getAllContextActivitiesTest() {
 		clearData();
 		
-		List<DBObject> activities = new ArrayList<DBObject>();
-		
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+
 		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID); 
 		
 		assertNotNull(context);
-		List<LA_Context> childrenTree = new ArrayList<LA_Context>();
-		childrenTree = MongoDB_ContextDataProvider.getChildrenTreeOfContext(context, childrenTree);
+		activities = context.getAllActivities();
 		
-		activities.addAll(MongoDB_ActivityDataProvider.getActivities_Test(context));
-		for (LA_Context child : childrenTree) {	
-			activities.addAll(MongoDB_ActivityDataProvider.getActivities_Test(context));
-		}
-		
-		assertNotNull(childrenTree);
+		assertNotNull(activities);
 		
 		System.out.println("-----------------------------------------");
-		System.out.println("Count children of context '" + context.getName() + "' - " + childrenTree.size()
-				+ " children");
-		System.out.println("Count activities of children '" + context.getName() + "' - " + activities.size() 
+		System.out.println("Get all activities of context '" + context.getName() + "' - " + activities.size() 
 				+ " activities");
 	}
 	
@@ -128,40 +120,12 @@ public class MongoDB_ContextTest {
 	}
 	
 	//@Test
-	public void countContextActivitiesTest() {
-		clearData();
-		
-		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID); 
-		
-		assertNotNull(context);
-		
-		int numberOfActivities = MongoDB_ContextDataProvider.countContextActivities(context.getID());
-		
-		System.out.println("-----------------------------------------");
-		System.out.println("Number of activities for context '" + context.getName() + "' : " + numberOfActivities);
-	}
-	
-	//@Test
-	public void countContextActivitiesTest2() {
-		clearData();
-
-		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID); 
-		
-		assertNotNull(context);
-		
-		int numberOfActivities = MongoDB_ActivityDataProvider.countActivitiesOfContext(context.getID());
-		
-		System.out.println("-----------------------------------------");
-		System.out.println("Number of activities for context '" + context.getName() + "' : " + numberOfActivities);
-	}
-	
-	@Test
 	public void getAllCoursesTest() {
 		clearData();
 		
 		long start = System.currentTimeMillis();
 		
-		Set<LA_Context> courses = MongoDB_ContextDataProvider.getAllCourses();
+		Set<LA_Context> courses = dataProvider.getCourses();
 		
 		long end = System.currentTimeMillis();
 		long duration = end - start;
@@ -176,7 +140,7 @@ public class MongoDB_ContextTest {
 	}
 	
 	//@Test
-	public void initializeContextPerformanceTest() {
+	public void getActivitiesOfAllContextsTest() {
 		clearData();
 		
 		long start = System.currentTimeMillis();
@@ -202,7 +166,7 @@ public class MongoDB_ContextTest {
 				"' : " + secDuration + " ms");
 	}
 	
-	//@Test
+	@Test
 	public void getLearningObjects() {
 		clearData();
 		
@@ -219,11 +183,53 @@ public class MongoDB_ContextTest {
 		System.out.println("Duration - get context learning objects: " + secDuration + " ms");
 	}
 	
+	@Test
+	public void getAllLearningContextObjects() {
+		clearData();
+		
+		long start = System.currentTimeMillis();
+		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID);
+		List<LA_Context> contextChilds = context.getChildren();
+		
+		List<LA_Object> lObjects = context.getObjects();
+		
+		for (LA_Context child : contextChilds) {
+			MongoDB_Context mChild = (MongoDB_Context) child;
+			lObjects.addAll(mChild.getObjects());
+		}
+		
+		long end = System.currentTimeMillis();
+		long duration = end - start;
+		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
+		
+		System.out.println("-----------------------------------------");
+		System.out.println("Context learning objects size " + lObjects.size());
+		System.out.println("Duration - get all context learning objects: " + secDuration + " ms");
+	}
+	
 	//@Test
 	public void getStudentsOfCourseTest() {
 		clearData();
 		
-		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(PYTHAGORAS_CONTEXT_ID);
+		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID);
+		long start = System.currentTimeMillis();
+		List<LA_Person> students = context.getStudents();
+
+		long end = System.currentTimeMillis();
+		long duration = end - start;
+		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
+		
+		System.out.println("-----------------------------------------");
+		System.out.println("Context '" + context.getName() + "' size students: " + students.size());
+		System.out.println("Duration - get students for course '" + context.getName() +
+				"' : " + secDuration + " ms");
+	}
+	
+	@Test
+	public void getPersonsOfCourseTest() {
+		clearData();
+		
+		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID);
 		long start = System.currentTimeMillis();
 		List<LA_Person> students = context.getStudents();
 
@@ -255,18 +261,4 @@ public class MongoDB_ContextTest {
 		System.out.println("Duration - get instructors for course '" + context.getName() +
 				"' : " + secDuration + " ms");
 	}
-	
-	//@Test
-	public void getCoursesPerformanceTest() {
-		clearData();
-		
-		long startTime = System.currentTimeMillis();
-		Set<LA_Context> courses = dataProvider.getCourses();
-		long stopTime = System.currentTimeMillis();
-		
-		Assert.assertNotNull(courses);
-		System.out.println(courses.size());
-		System.out.println((stopTime - startTime) / 1000);
-	}
-
 }

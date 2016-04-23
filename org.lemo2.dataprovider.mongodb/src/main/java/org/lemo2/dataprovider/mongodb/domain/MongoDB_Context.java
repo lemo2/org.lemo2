@@ -2,7 +2,6 @@ package org.lemo2.dataprovider.mongodb.domain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +14,6 @@ import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.MongoDB_ActivityDataProvider;
 import org.lemo2.dataprovider.mongodb.MongoDB_ContextDataProvider;
 import org.lemo2.dataprovider.mongodb.MongoDB_ObjectDataProvider;
-import org.lemo2.dataprovider.mongodb.MongoDB_PersonDataProvider;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
@@ -40,8 +38,13 @@ public class MongoDB_Context implements LA_Context {
 		this.name = (String) contextObject.get("name");
 		
 		extractExtentions(contextObject);
-		//extractReference(contextObject);
-		
+		/*
+		extractReference(contextObject);
+		extractChildren(contextObject);
+		extractLearningObjects(contextObject);
+		extractStudents(contextObject);
+		extractInstructors(contextObject);
+		*/
 		initialize();
 	} 
 	
@@ -92,6 +95,40 @@ public class MongoDB_Context implements LA_Context {
 		List<LA_Object> contextObjects = MongoDB_ObjectDataProvider.getLearningObjectsByIDList(objectIDs);
 		this.contextObjects = contextObjects;
 	}
+	
+	/**
+	 * Extracts and builds the children from the DBObject. 
+	 * @param context
+	 */
+	private void extractChildren(DBObject context) {
+		List<LA_Context> children = new ArrayList<LA_Context>();
+		
+		children = MongoDB_ContextDataProvider.getChildrenTreeOfContext(this, children);
+		this.children = children;
+	}
+	
+	/**
+	 * Extracts and builds the students from the DBObject. 
+	 * @param context
+	 */
+	private void extractStudents(DBObject context) {
+		List<LA_Person> students = new ArrayList<LA_Person>();
+		
+		students = MongoDB_ContextDataProvider.getContextStudents(contextID);
+		this.students = students;
+	}
+	
+	/**
+	 * Extracts and builds the instructors from the DBObject. 
+	 * @param context
+	 */
+	private void extractInstructors(DBObject context) {
+		List<LA_Person> instructors = new ArrayList<LA_Person>();
+		
+		instructors = MongoDB_ContextDataProvider.getContextInstructors(contextID);
+		this.instructors = instructors;
+	}
+	
 	
 	public int getID() {
 		return contextID;
@@ -171,21 +208,8 @@ public class MongoDB_Context implements LA_Context {
 		students = getStudents();
 	}
 	
-	/**
-	 * TODO: überarbeiten...
-	 */
 	@Override
 	public List<LA_Activity> getActivities() {
-	
-		/*
-		if (!isLocked() && !allActivitiesAreInitialized()) {
-			mLock = true;
-			contextActivities = MongoDB_ActivityDataProvider.getActivities(this);
-		}
-		
-		mLock = false;
-		return contextActivities;
-		*/
 		return MongoDB_ActivityDataProvider.getActivities(this);
 	}
 	
@@ -222,7 +246,7 @@ public class MongoDB_Context implements LA_Context {
 	public List<LA_Activity> getAllActivities() {
 		return MongoDB_ActivityDataProvider.getAllActivities(this);
 	}
-
+	
 	@Override
 	public List<LA_Activity> getAllActivities(LA_Person person, LA_Object obj) {
 		return MongoDB_ActivityDataProvider.getAllActivities(person, obj);

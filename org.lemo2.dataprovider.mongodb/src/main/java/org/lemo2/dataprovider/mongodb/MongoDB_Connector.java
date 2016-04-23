@@ -11,6 +11,7 @@ public class MongoDB_Connector {
 	
 	private final static String COL_PERSON = "person";
 	private final static String COL_LEARNING_ACTIVITY = "learningActivity";
+	private final static String COL_LEARNING_ACTIVITY_CON = "learningActivity2";
 	private final static String COL_LEARNING_CONTEXT = "learningContext";
 	private final static String COL_LEARNING_CONTEXT_ACTIVITY = "learningContextActivity";
 	private final static String COL_LEARNING_OBJECT = "learningObject";
@@ -24,15 +25,23 @@ public class MongoDB_Connector {
 	 * Creates a connection to the collection which holds the learning activity data.
 	 * @return
 	 */
-	protected static DBCollection connectToActivityCollection() {
+	public static DBCollection connectToActivityCollection() {
 		return mongoDatabase.getCollection(COL_LEARNING_ACTIVITY);
+	}
+	
+	/**
+	 * Creates a connection to the collection which holds the learning activity data.
+	 * @return
+	 */
+	public static DBCollection connectToActivityWithConCollection() {
+		return mongoDatabase.getCollection(COL_LEARNING_ACTIVITY_CON);
 	}
 
 	/**
 	 * Creates a connection to the collection which holds the learning context data.
 	 * @return
 	 */
-	protected static DBCollection connectToContextCollection() {
+	public static DBCollection connectToContextCollection() {
 		return mongoDatabase.getCollection(COL_LEARNING_CONTEXT);
 	}
 	
@@ -40,7 +49,7 @@ public class MongoDB_Connector {
 	 * Creates a connection to the collection which holds the learning context data.
 	 * @return
 	 */
-	protected static DBCollection connectToContextActivityCollection() {
+	public static DBCollection connectToContextActivityCollection() {
 		return mongoDatabase.getCollection(COL_LEARNING_CONTEXT_ACTIVITY);
 	}
 	
@@ -48,7 +57,7 @@ public class MongoDB_Connector {
 	 * Creates a connection to the collection which holds the learning object data.
 	 * @return
 	 */
-	protected static DBCollection connectToObjectCollection() {
+	public static DBCollection connectToObjectCollection() {
 		return mongoDatabase.getCollection(COL_LEARNING_OBJECT);
 	}
 	
@@ -56,7 +65,7 @@ public class MongoDB_Connector {
 	 * Creates a connection to the collection which holds the persons data.
 	 * @return
 	 */
-	protected static DBCollection connectToPersonCollection() {
+	public static DBCollection connectToPersonCollection() {
 		return mongoDatabase.getCollection(COL_PERSON);
 	}
 	

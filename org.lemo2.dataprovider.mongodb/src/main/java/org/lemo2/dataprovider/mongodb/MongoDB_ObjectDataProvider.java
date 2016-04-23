@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.lemo2.dataprovider.api.LA_Object;
-import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Object;
 
 import com.mongodb.BasicDBObject;
@@ -56,6 +55,26 @@ public class MongoDB_ObjectDataProvider {
 		}
 		
 		return objectIDs;
+	}
+	
+	public static List<LA_Object> getAllLearningObjects() {
+		DBCollection collection = MongoDB_Connector.connectToObjectCollection();
+		
+		List<LA_Object> objects = new ArrayList<LA_Object>();
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		//select.put("_id", 1);
+		
+		DBCursor cursor = collection.find(idQuery, select);
+
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			MongoDB_Object lObject = createLearningObject(dbObj);
+			objects.add(lObject);
+		}
+		
+		return objects;
 	}
 	
 	public static LA_Object getLearningObjectByID(Integer objectID) {
@@ -155,7 +174,7 @@ public class MongoDB_ObjectDataProvider {
 	 * @param children
 	 * @return
 	 */
-	protected static List<MongoDB_Object> getChildrenTreeOfLearningObject(Integer objID, 
+	public static List<MongoDB_Object> getChildrenTreeOfLearningObject(Integer objID, 
 			List<MongoDB_Object> children) {
 	   for( MongoDB_Object child : getChildrenOfLearningObject(objID) )
 	   {

@@ -27,11 +27,12 @@ public class MongoDB_Object implements LA_Object {
 		this.objectID = (int) dbObject.get("_id");
 		this.name = (String) dbObject.get("name");
 		this.type = (String) dbObject.get("type");
-		/*
+		
 		extractExtensions(dbObject);
+		
 		extractParent(dbObject);
 		extractChildren(dbObject);
-		*/
+		
 		initialize();
 	}
 	

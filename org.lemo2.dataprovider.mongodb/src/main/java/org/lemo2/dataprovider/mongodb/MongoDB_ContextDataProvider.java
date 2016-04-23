@@ -7,22 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bson.BSONObject;
-import org.bson.Document;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
-import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context2;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Person;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.client.FindIterable;
 
 public class MongoDB_ContextDataProvider {
 
@@ -152,24 +146,6 @@ public class MongoDB_ContextDataProvider {
 	}
 	
 	/**
-	 * JUST FOR TEST
-	 * Returns recursively all children and their subsequent children of the given context.
-	 * @param context
-	 * @param children
-	 * @return
-	 */
-	public static List<LA_Context> getChildrenTreeOfContext(MongoDB_Context2 context, List<LA_Context> children)
-	{
-	   for( LA_Context child : getFirstDegreeChildrenOfContext(context.getID()) )
-	   {
-		   MongoDB_Context mChild = (MongoDB_Context) child;
-		   children.add(child);
-		   getChildrenTreeOfContext(mChild, children);
-	   }
-	   return children;
-	}
-	
-	/**
 	 * Returns recursively all children and their subsequent children of the given context.
 	 * @param context
 	 * @param children
@@ -238,7 +214,7 @@ public class MongoDB_ContextDataProvider {
 		
 		return courses;
 	}
-	
+		
 	/**
 	 * Returns the students of the given contexts and its children tree.
 	 * @param context

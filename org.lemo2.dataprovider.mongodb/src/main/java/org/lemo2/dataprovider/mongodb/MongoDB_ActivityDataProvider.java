@@ -168,22 +168,21 @@ public class MongoDB_ActivityDataProvider {
 	}
 	
 	public static List<LA_Activity> getActivities(LA_Context context) {
+		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
+		
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
 		MongoDB_Context mContext = (MongoDB_Context) context;
 		
-		List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(mContext.getID());
-		activities = MongoDB_ActivityDataProvider.getActivitiesByIDList(activityIDs);
+		BasicDBObject selectQuery = new BasicDBObject();
+		selectQuery.put("context", mContext.getID());
 		
-		return activities;
-	}
-	
-	// TEST
-	public static List<DBObject> getActivities_Test(LA_Context context) {
-		List<DBObject> activities = new ArrayList<DBObject>();
-		MongoDB_Context mContext = (MongoDB_Context) context;
-		
-		List<Integer> activityIDs = MongoDB_ContextDataProvider.getContextActivityIDs(mContext.getID());
-		activities = MongoDB_ActivityDataProvider.getActivitiesByIDList_DBObjects(activityIDs);
+		DBCursor cursor = collection.find(selectQuery);
+	    
+	    while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			LA_Activity activity = createActivityObject(dbObj);		
+			activities.add(activity);
+		}
 		
 		return activities;
 	}
@@ -379,7 +378,7 @@ public class MongoDB_ActivityDataProvider {
 	private static List<LA_Activity> getActivitiesWildcardPersonAndLearningObject(MongoDB_Context context, 
 			long start, long end) {
 		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
-		List<Integer> activityIDs = getContextActivityIDs(context);
+		MongoDB_Context mContext = (MongoDB_Context) context;
 		
 		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
 		
@@ -387,7 +386,7 @@ public class MongoDB_ActivityDataProvider {
 		BasicDBObject sortQuery = new BasicDBObject();
 		
 		selectQuery.put("time", buildTimeRangeQuery(start, end));
-		selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
+		selectQuery.put("context", mContext.getID());
 		sortQuery.put("time", 1);
 		
 	    DBCursor cursor = collection.find(selectQuery).sort(sortQuery);
@@ -403,13 +402,13 @@ public class MongoDB_ActivityDataProvider {
 	
 	private static List<LA_Activity> getActivitiesWildcardPersonAndLearningObjectAndTimerange(MongoDB_Context context) {
 		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
-		List<Integer> activityIDs = getContextActivityIDs(context);
+		MongoDB_Context mContext = (MongoDB_Context) context;
 		
 		List<LA_Activity> contextActivities = new ArrayList<LA_Activity>();
 		
 		BasicDBObject selectQuery = new BasicDBObject();
 		
-		selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
+		selectQuery.put("context", mContext.getID());
 	    DBCursor cursor = collection.find(selectQuery);
 	    
 	    while(cursor.hasNext()) {
@@ -482,6 +481,7 @@ public class MongoDB_ActivityDataProvider {
 		return activities;
 	}
 	
+	// TODO: warum array?
 	private static List<LA_Activity> getActivitiesWildcardPersonAndTimeRange(MongoDB_Object obj) {		
 		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
 		
@@ -628,23 +628,6 @@ public class MongoDB_ActivityDataProvider {
 			DBObject dbObj = cursor.next();
 			lActivity = new MongoDB_Activity(dbObj);
 			activities.add(lActivity);
-		}
-		
-		return activities;
-	}
-	
-	public static List<DBObject> getActivitiesByIDList_DBObjects(List<Integer> activityIDs) {
-		List<DBObject> activities = new ArrayList<DBObject>();
-		
-		// load activities from database which are not initialized
-		DBCollection collection = MongoDB_Connector.connectToActivityCollection();
-		BasicDBObject selectQuery = new BasicDBObject();
-		selectQuery.put("_id", new BasicDBObject("$in", activityIDs));
-		
-		DBCursor cursor = collection.find(selectQuery);
-		while(cursor.hasNext()) {
-			DBObject dbObj = cursor.next();
-			activities.add(dbObj);
 		}
 		
 		return activities;

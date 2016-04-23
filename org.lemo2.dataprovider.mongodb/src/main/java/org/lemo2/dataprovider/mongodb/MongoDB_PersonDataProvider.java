@@ -39,6 +39,28 @@ public class MongoDB_PersonDataProvider {
 		return INITIALIZED_PERSONS.size();
 	}
 	
+	// For test
+	public static List<Integer> getAllPersonIDs() {
+		DBCollection collection = MongoDB_Connector.connectToPersonCollection();
+		
+		List<Integer> personIDs = new ArrayList<Integer>();
+		
+		BasicDBObject idQuery = new BasicDBObject();
+		BasicDBObject select = new BasicDBObject();
+		select.put("_id", 1);
+		
+		DBCursor cursor = collection.find(idQuery, select);
+		
+		int peronID;
+		while(cursor.hasNext()) {
+			DBObject dbObj = cursor.next();
+			peronID = (Integer) dbObj.get("_id");
+			personIDs.add(peronID);
+		}
+		
+		return personIDs;
+	}
+	
 	public static MongoDB_Person getPersonByID(Integer personID) {	
 		MongoDB_Person person = INITIALIZED_PERSONS.get(personID);
 		

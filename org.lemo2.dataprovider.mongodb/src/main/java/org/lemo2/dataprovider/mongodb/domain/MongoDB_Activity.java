@@ -10,8 +10,6 @@ import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.MongoDB_ActivityDataProvider;
-import org.lemo2.dataprovider.mongodb.MongoDB_ObjectDataProvider;
-import org.lemo2.dataprovider.mongodb.MongoDB_PersonDataProvider;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
@@ -43,7 +41,6 @@ public class MongoDB_Activity implements LA_Activity {
 		this.info = (String) activityObject.get("info");
 		
 		extractExtensions(activityObject);
-		// extract
 		
 		initialize();
 	}
@@ -70,37 +67,6 @@ public class MongoDB_Activity implements LA_Activity {
 		    	extAttributes.put(attr, value);
 		    }
 		}
-	}
-	
-	/**
-	 * Extract reference to another learning activity.
-	 * Checks if the referenced learning activity was already initialized. 
-	 * If not, load it from the MongoDB.
-	 * @param dbObject
-	 */
-	private void extractReference(DBObject activityObject) {
-		Integer referenceID = (Integer) activityObject.get("reference");
-		LA_Activity reference = MongoDB_ActivityDataProvider.getActivityByID(referenceID);
-		
-		this.reference = reference;
-	}
-	
-	/**
-	 * Extracts the Learning object.
-	 * @param activityObject
-	 */
-	private void extractLearningObject(DBObject activityObject) {
-		Integer objectID = (Integer) activityObject.get("learningObject");
-		LA_Object lObject = MongoDB_ObjectDataProvider.getLearningObjectByID(objectID);
-		
-		this.activityObject = lObject;
-	}
-	
-	private void extractPerson(DBObject activityObject) {
-		Integer personID =  (Integer) activityObject.get("personID");
-		LA_Person person = MongoDB_PersonDataProvider.getPersonByID(personID);
-		
-		this.activityPerson = person;
 	}
 	
 	@Override

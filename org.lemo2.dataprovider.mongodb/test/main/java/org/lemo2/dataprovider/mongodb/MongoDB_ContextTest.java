@@ -14,9 +14,6 @@ import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
-import org.lemo2.dataprovider.mongodb.domain.MongoDB_Object;
-
-import com.mongodb.DBObject;
 
 public class MongoDB_ContextTest {
 
@@ -41,7 +38,7 @@ public class MongoDB_ContextTest {
 		MongoDB_ObjectDataProvider.clearInitializedLearningObjects();
 	}
 	
-	//@Test
+	@Test
 	public void getChildrenTreeActivitiesTest() {
 		clearData();
 		
@@ -67,7 +64,7 @@ public class MongoDB_ContextTest {
 				+ " activities");
 	}
 	
-	//@Test
+	@Test
 	public void getAllContextActivitiesTest() {
 		clearData();
 		
@@ -85,7 +82,7 @@ public class MongoDB_ContextTest {
 				+ " activities");
 	}
 	
-	//@Test
+	@Test
 	public void getChildrenTreeTest() {
 		clearData();
 		
@@ -97,11 +94,18 @@ public class MongoDB_ContextTest {
 		
 		assertNotNull(childrenTree);
 		
+		System.out.println("######### CHILDREN #################");
+		for (LA_Context child : childrenTree) {
+			System.out.println(child.getName());
+		}
+		
+		System.out.println("######### END ######################");
+		
 		System.out.println("-----------------------------------------");
 		System.out.println("Count children of context '" + context.getName() + "' - " + childrenTree.size());
 	}
 	
-	//@Test
+	@Test
 	public void getFirstDegreeChildrenTest() {
 		clearData();
 
@@ -119,7 +123,7 @@ public class MongoDB_ContextTest {
 		assertEquals(17, childrenTree.size());
 	}
 	
-	//@Test
+	@Test
 	public void getAllCoursesTest() {
 		clearData();
 		
@@ -139,7 +143,7 @@ public class MongoDB_ContextTest {
 				MongoDB_ContextDataProvider.getSizeOfInitializedContexts());
 	}
 	
-	//@Test
+	@Test
 	public void getActivitiesOfAllContextsTest() {
 		clearData();
 		
@@ -207,7 +211,7 @@ public class MongoDB_ContextTest {
 		System.out.println("Duration - get all context learning objects: " + secDuration + " ms");
 	}
 	
-	//@Test
+	@Test
 	public void getStudentsOfCourseTest() {
 		clearData();
 		
@@ -243,7 +247,7 @@ public class MongoDB_ContextTest {
 				"' : " + secDuration + " ms");
 	}
 	
-	//@Test
+	@Test
 	public void getInstructorsOfCourseTest() {
 		clearData();
 		

@@ -3,7 +3,6 @@ package org.lemo2.dataprovider.neo4j;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
@@ -14,7 +13,6 @@ import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
-import org.neo4j.driver.v1.Value;
 
 public class Neo4j_ContextDataProvider {
 	
@@ -24,9 +22,10 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (context:LearningContext {contextID:'" + contextID + "'}) " +
+		String statement = "MATCH (context:LearningContext) " +
+				"WHERE context.contextID = '" + contextID + "' " +
 				"WITH context " +
-				"MATCH (parent:LearningContext)-[r:PARENT_OF]->(context) " +
+				"MATCH (parent:LearningContext)-[:PARENT_OF]->(context) " +
 				"RETURN parent.contextID";
 		StatementResult result = session.run(statement);
 		
@@ -37,6 +36,9 @@ public class Neo4j_ContextDataProvider {
 			parent = new Neo4j_Context(parentContextID);
 		}
 		
+		driver.close();
+		session.close();
+		
 		return parent;
 	}
 	
@@ -46,7 +48,8 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (parent:LearningContext {contextID:'" + contextID + "'}) " +
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
 				"WITH parent " +
 				"MATCH (parent)-[r:PARENT_OF]->(child) " +
 				"RETURN child.contextID";
@@ -58,6 +61,9 @@ public class Neo4j_ContextDataProvider {
 			children.add(new Neo4j_Context(parentContextID));
 		}
 		
+		driver.close();
+		session.close();
+		
 		return children;
 	}
 	
@@ -67,7 +73,8 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (parent:LearningContext {contextID:'" + contextID + "'}) " +
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
 				"WITH parent " +
 				"MATCH (parent)-[r:PARENT_OF*1..]->(child) " +
 				"RETURN child.contextID";
@@ -79,6 +86,9 @@ public class Neo4j_ContextDataProvider {
 			children.add(new Neo4j_Context(parentContextID));
 		}
 		
+		driver.close();
+		session.close();
+		
 		return children;
 	}
 	
@@ -88,7 +98,8 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (parent:LearningContext {contextID:'" + contextID + "'}) " +
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
 				"WITH parent " +
 				"MATCH (person)-[r:PARTICIPATES_IN {role:'instructor'}]->(parent) " +
 				"RETURN person.personID";
@@ -100,6 +111,9 @@ public class Neo4j_ContextDataProvider {
 			instructors.add(new Neo4j_Person(personID));
 		}
 		
+		driver.close();
+		session.close();
+		
 		return instructors;
 	}
 	
@@ -109,7 +123,8 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (parent:LearningContext {contextID:'" + contextID + "'}) " +
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
 				"WITH parent " +
 				"MATCH (person)-[r:PARTICIPATES_IN {role:'student'}]->(parent) " +
 				"RETURN person.personID";
@@ -120,6 +135,9 @@ public class Neo4j_ContextDataProvider {
 			String personID = record.get("person.personID").asString();
 			students.add(new Neo4j_Person(personID));
 		}
+		
+		driver.close();
+		session.close();
 		
 		return students;
 	}
@@ -139,6 +157,9 @@ public class Neo4j_ContextDataProvider {
 			students.add(new Neo4j_Person(personID));
 		}
 		
+		driver.close();
+		session.close();
+		
 		return students;
 	}
 	
@@ -148,7 +169,8 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (context:LearningContext {contextID:'" + contextID + "'}) " +
+		String statement = "MATCH (context:LearningContext) " +
+				"WHERE context.contextID = '" + contextID + "' " +
 				"WITH context " +
 				"MATCH (context)-[r:HAS_OBJECT]->(object:LearningObject) " +
 				"RETURN object.objectID";
@@ -159,6 +181,9 @@ public class Neo4j_ContextDataProvider {
 			String objectID = record.get("object.objectID").asString();
 			learningObjects.add(new Neo4j_Object(objectID));
 		}
+		
+		driver.close();
+		session.close();
 		
 		return learningObjects;
 	}
@@ -177,6 +202,9 @@ public class Neo4j_ContextDataProvider {
 			String objectID = record.get("object.objectID").asString();
 			learningObjects.add(new Neo4j_Object(objectID));
 		}
+		
+		driver.close();
+		session.close();
 		
 		return learningObjects;
 	}

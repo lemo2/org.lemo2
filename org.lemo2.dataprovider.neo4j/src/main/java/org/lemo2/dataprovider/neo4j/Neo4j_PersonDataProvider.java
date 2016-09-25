@@ -40,6 +40,9 @@ public class Neo4j_PersonDataProvider {
 			activities.add(activity);
 		}
 		
+		driver.close();
+		session.close();
+		
 		return activities;
 	}
 	
@@ -69,6 +72,9 @@ public class Neo4j_PersonDataProvider {
 			LA_Context context = new Neo4j_Context(contextID);
 			contexts.add(context);
 		}
+		
+		driver.close();
+		session.close();
 		
 		return contexts;
 	}

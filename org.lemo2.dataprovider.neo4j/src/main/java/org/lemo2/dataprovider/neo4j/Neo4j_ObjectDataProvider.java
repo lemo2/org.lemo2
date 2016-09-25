@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lemo2.dataprovider.api.LA_Object;
-import org.lemo2.dataprovider.neo4j.domain.Neo4j_Context;
 import org.lemo2.dataprovider.neo4j.domain.Neo4j_Object;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Record;
@@ -25,7 +24,7 @@ public class Neo4j_ObjectDataProvider {
 		Session session = driver.session();
 	
 		String statement = "MATCH(lObject:LearningObject) " +
-				"WHERE lObject.objectID = '" + objectID + "' " + 
+				"WHERE lObject.objectID = '" + objectID + "' " +
 				"RETURN lObject.objectID";
 		
 		StatementResult result = session.run(statement);
@@ -33,6 +32,9 @@ public class Neo4j_ObjectDataProvider {
 		while(result.hasNext()) {
 			lObject = new Neo4j_Object(objectID);
 		}
+		
+		driver.close();
+		session.close();
 		
 		return lObject;
 	}
@@ -62,6 +64,9 @@ public class Neo4j_ObjectDataProvider {
 			lObjects.add(lObject);
 		}
 		
+		driver.close();
+		session.close();
+		
 		return lObjects;
 	}
 	
@@ -71,9 +76,10 @@ public class Neo4j_ObjectDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "MATCH (object:LearningObject {objectID:'" + objectID + "'}) " +
-				"WITH object " +
-				"MATCH (parent:LearningObject)-[r:PARENT_OF]->(object) " +
+		String statement = "MATCH (lObject:LearningObject) " +
+				"WHERE lObject.objectID = '" + objectID + "' " +
+				"WITH lObject " +
+				"MATCH (parent:LearningObject)-[r:PARENT_OF]->(lObject) " +
 				"RETURN parent.objectID";
 		
 		StatementResult result = session.run(statement);
@@ -84,6 +90,9 @@ public class Neo4j_ObjectDataProvider {
 			
 			parent = new Neo4j_Object(parentObjectID);
 		}
+		
+		driver.close();
+		session.close();
 		
 		return parent;
 	}
@@ -113,6 +122,9 @@ public class Neo4j_ObjectDataProvider {
 			lObjects.add(lObject);
 		}
 		
+		driver.close();
+		session.close();
+		
 		return lObjects;
 	}
 	
@@ -140,6 +152,9 @@ public class Neo4j_ObjectDataProvider {
 			LA_Object lObject = new Neo4j_Object(oID);
 			lObjects.add(lObject);
 		}
+		
+		driver.close();
+		session.close();
 		
 		return lObjects;
 	}

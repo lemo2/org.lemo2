@@ -107,4 +107,13 @@ public class Neo4j_ActivityDataProviderTest {
 		assertEquals(8, activities.size());
 	}
 
+	@Test
+	public void getActivitiesOfContext_Parameters_ContextAndPersonAndNullObject() {
+		context = new Neo4j_Context("TestContext_1");
+		person = new Neo4j_Person("Person_Student_1");
+		
+		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context, person, null);
+		
+		assertEquals(8, activities.size());
+	}
 }

@@ -40,7 +40,7 @@ public class Neo4j_ActivityDataProvider {
 		String statement = "MATCH (context:LearningContext) " +
 				"WHERE context.contextID = '" + nContext.getContextID() + "' " +
 				"WITH context " +
-				"MATCH (context)-[r:HAS_ACTIVITY*2]->(activity:LearningActivity) " +
+				"MATCH (context)-[r:HAS_ACTIVITY*1..]->(activity:LearningActivity) " +
 				"RETURN activity.activityID";
 		
 		StatementResult result = session.run(statement);
@@ -54,6 +54,90 @@ public class Neo4j_ActivityDataProvider {
 		driver.close();
 		session.close();
 		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getAllActivitiesOfContext(LA_Context context, LA_Person person, LA_Object obj) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		Neo4j_Context nContext;
+		Neo4j_Person nPerson;
+		Neo4j_Object nObj;
+		
+		if (context == null || person == null || obj == null) {
+			return activities;
+		}
+		else {
+			nContext = (Neo4j_Context) context;
+			nPerson = (Neo4j_Person) person;
+			nObj = (Neo4j_Object) obj;
+		}
+		
+		Driver driver = Neo4j_Connector.getDriver();
+		Session session = driver.session();
+		
+		String statement = "MATCH (person:Person)-[d:DOES]->(activity:LearningActivity) " +
+				"WHERE person.personID = '" + nPerson.getPersonID() + "' " +
+				"WITH activity " + 
+				"MATCH(lObject:LearningObject)<-[:USES]-(activity)<-[:HAS_ACTIVITY]-(context:LearningContext) " +
+				"WHERE lObject.objectID = '" + nObj.getObjectID() + "' " +
+				"AND context.contextID = '" + nContext.getContextID() + "' " +
+				"WITH activity RETURN activity.activityID";
+		
+		StatementResult result = session.run(statement);
+		
+		while(result.hasNext()) {
+			Record record = result.next();
+			String activityID = record.get("activity.activityID").asString();
+			activities.add(new Neo4j_Activity(activityID));
+		}
+		
+		driver.close();
+		session.close();
+		
+		return activities;
+	}
+	
+	public static List<LA_Activity> getAllActivitiesOfContext(LA_Context context, LA_Person person, LA_Object obj,
+			long start, long end) {
+		List<LA_Activity> activities = new ArrayList<LA_Activity>();
+		
+		Neo4j_Context nContext;
+		Neo4j_Person nPerson;
+		Neo4j_Object nObj;
+		
+		if (context == null || person == null || obj == null) {
+			return activities;
+		}
+		else {
+			nContext = (Neo4j_Context) context;
+			nPerson = (Neo4j_Person) person;
+			nObj = (Neo4j_Object) obj;
+		}
+		
+		Driver driver = Neo4j_Connector.getDriver();
+		Session session = driver.session();
+		
+		String statement = "MATCH (person:Person)-[d:DOES]->(activity:LearningActivity) " +
+				"WHERE person.personID = '" + nPerson.getPersonID() + "' " +
+				"d.time >= " + start + " AND d.time <= " + end +
+				"WITH activity " + 
+				"MATCH(lObject:LearningObject)<-[:USES]-(activity)<-[:HAS_ACTIVITY]-(context:LearningContext) " +
+				"WHERE lObject.objectID = '" + nObj.getObjectID() + "' " +
+				"AND context.contextID = '" + nContext.getContextID() + "' " +
+				"WITH activity RETURN activity.activityID";
+		
+		StatementResult result = session.run(statement);
+		
+		while(result.hasNext()) {
+			Record record = result.next();
+			String activityID = record.get("activity.activityID").asString();
+			activities.add(new Neo4j_Activity(activityID));
+		}
+		
+		driver.close();
+		session.close();
+	
 		return activities;
 	}
 	
@@ -594,5 +678,37 @@ public class Neo4j_ActivityDataProvider {
 		session.close();
 		
 		return person;
+	}
+	
+	public static String getActionOfActivity(String activityID) {
+		String action = "";
+		
+		if (activityID == null || activityID.equals("")) {
+			return action;
+		}
+		
+		Driver driver = Neo4j_Connector.getDriver();
+		Session session = driver.session();
+	
+		String statement = "MATCH(activity:LearningActivity) " +
+				"WHERE activity.activityID =  '" + activityID + "' " +
+				"RETURN labels(activity)";
+		
+		StatementResult result = session.run(statement);
+		
+		while(result.hasNext()) {
+			Record record = result.next();
+			List<Object> actions = record.get("labels(activity)").asList();
+			for (Object a : actions) {
+				if (!a.equals("LearningActivity")) {
+					action = a.toString();
+				}
+			}
+		}
+		
+		driver.close();
+		session.close();
+		
+		return action;
 	}
 }

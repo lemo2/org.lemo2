@@ -13,7 +13,11 @@ public class Neo4j_ObjectDataProviderTest {
 	
 	@Test
 	public void getTypeOfLearningObject() {
+		String objectID = "1";
 		
+		String type = Neo4j_ObjectDataProvider.getTypeOfLearningObject(objectID);
+		
+		assertEquals("Progress", type);
 	}
 	
 	@Test

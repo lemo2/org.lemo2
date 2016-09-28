@@ -28,6 +28,9 @@ public class Neo4j_Activity implements LA_Activity {
 
 	@Override
 	public String getAction() {
+		if (this.action == null || this.action.equals("")) {
+			this.action = Neo4j_ActivityDataProvider.getActionOfActivity(this.activityID);
+		}
 		return this.action;
 	}
 

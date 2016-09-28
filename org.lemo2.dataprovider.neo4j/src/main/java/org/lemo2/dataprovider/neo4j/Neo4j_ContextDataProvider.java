@@ -101,7 +101,34 @@ public class Neo4j_ContextDataProvider {
 		String statement = "MATCH (parent:LearningContext) " +
 				"WHERE parent.contextID = '" + contextID + "' " +
 				"WITH parent " +
-				"MATCH (person)-[r:PARTICIPATES_IN {role:'instructor'}]->(parent) " +
+				"MATCH (person)-[r:PARTICIPATES_IN]->(parent) " +
+				"WHERE r.role = 'Instructor' " +
+				"RETURN person.personID";
+		StatementResult result = session.run(statement);
+		
+		while(result.hasNext()) {
+			Record record = result.next();
+			String personID = record.get("person.personID").asString();
+			instructors.add(new Neo4j_Person(personID));
+		}
+		
+		driver.close();
+		session.close();
+		
+		return instructors;
+	}
+	
+	public static List<LA_Person> getAllInstructorsOfContext(String contextID) {
+		List<LA_Person> instructors = new ArrayList<LA_Person>();
+		
+		Driver driver = Neo4j_Connector.getDriver();
+		Session session = driver.session();
+		
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
+				"WITH parent " +
+				"MATCH (person)-[r:PARTICIPATES_IN*1..]->(parent) " +
+				"WHERE r.role = 'Instructor' " +
 				"RETURN person.personID";
 		StatementResult result = session.run(statement);
 		
@@ -126,7 +153,8 @@ public class Neo4j_ContextDataProvider {
 		String statement = "MATCH (parent:LearningContext) " +
 				"WHERE parent.contextID = '" + contextID + "' " +
 				"WITH parent " +
-				"MATCH (person)-[r:PARTICIPATES_IN {role:'student'}]->(parent) " +
+				"MATCH (person)-[r:PARTICIPATES_IN]->(parent) " +
+				"WHERE r.role = 'Student' " +
 				"RETURN person.personID";
 		StatementResult result = session.run(statement);
 		
@@ -142,13 +170,19 @@ public class Neo4j_ContextDataProvider {
 		return students;
 	}
 	
+	//TODO: Wenn Tiefenbeziehung mit einbezogen werden, kommt es zum Fehler...
 	public static List<LA_Person> getAllStudentsOfContext(String contextID) {
 		List<LA_Person> students = new ArrayList<LA_Person>();
 		
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "";
+		String statement = "MATCH (context:LearningContext) " +
+				"WHERE context.contextID = '" + contextID + "' " +
+				"WITH context " +
+				"MATCH (context)-[r:HAS_PERSON]->(person) " +
+				"WHERE r.role = 'Student' " +
+				"RETURN person.personID";
 		StatementResult result = session.run(statement);
 		
 		while(result.hasNext()) {
@@ -161,6 +195,63 @@ public class Neo4j_ContextDataProvider {
 		session.close();
 		
 		return students;
+	}
+	
+	public static List<LA_Person> getPersonsWithRoleOfContext(String contextID, String role) {
+		List<LA_Person> persons = new ArrayList<LA_Person>();
+		
+		if (contextID == null || contextID.equals("")) {
+			return persons;
+		}
+		
+		Driver driver = Neo4j_Connector.getDriver();
+		Session session = driver.session();
+		
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
+				"WITH parent " +
+				"MATCH (person)-[r:PARTICIPATES_IN]->(parent) " +
+				"WHERE r.role = '" + role + "' " +
+				"RETURN person.personID";
+		StatementResult result = session.run(statement);
+		
+		while(result.hasNext()) {
+			Record record = result.next();
+			String personID = record.get("person.personID").asString();
+			persons.add(new Neo4j_Person(personID));
+		}
+		
+		driver.close();
+		session.close();
+		
+		return persons;
+	}
+	
+	public static List<LA_Person> getAllPersonsWithRoleOfContext(String contextID, String role) {
+		List<LA_Person> persons = new ArrayList<LA_Person>();
+		
+		if (contextID == null || contextID.equals("")) {
+			return persons;
+		}
+		
+		Driver driver = Neo4j_Connector.getDriver();
+		Session session = driver.session();
+		
+		String statement = "MATCH (parent:LearningContext) " +
+				"WHERE parent.contextID = '" + contextID + "' " +
+				"WITH parent " +
+				"MATCH (person)-[r:PARTICIPATES_IN*1..]->(parent) " +
+				"WHERE r.role = '" + role + "' " +
+				"RETURN person.personID";
+		StatementResult result = session.run(statement);
+		
+		while(result.hasNext()) {
+			Record record = result.next();
+			String personID = record.get("person.personID").asString();
+			persons.add(new Neo4j_Person(personID));
+		}
+		
+		return persons;
 	}
 	
 	public static List<LA_Object> getLearningObjectsOfContext(String contextID) {
@@ -194,7 +285,11 @@ public class Neo4j_ContextDataProvider {
 		Driver driver = Neo4j_Connector.getDriver();
 		Session session = driver.session();
 		
-		String statement = "";
+		String statement = "MATCH (context:LearningContext) " +
+				"WHERE context.contextID = '" + contextID + "' " +
+				"WITH context " +
+				"MATCH (context)-[r:HAS_OBJECT*1..]->(object:LearningObject) " +
+				"RETURN object.objectID";
 		StatementResult result = session.run(statement);
 		
 		while(result.hasNext()) {

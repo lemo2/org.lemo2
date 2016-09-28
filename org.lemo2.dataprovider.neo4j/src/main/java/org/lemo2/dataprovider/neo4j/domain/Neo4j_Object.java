@@ -3,6 +3,7 @@ package org.lemo2.dataprovider.neo4j.domain;
 import java.util.List;
 import java.util.Set;
 
+import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.neo4j.Neo4j_ObjectDataProvider;
 
@@ -58,5 +59,13 @@ public class Neo4j_Object implements LA_Object {
 	@Override
 	public List<LA_Object> getChildren() {
 		return Neo4j_ObjectDataProvider.getChildrenOfLearningObject(this.objectID);
+	}
+	
+	public List<LA_Object> getAllChildrenOfLearningObject() {
+		return Neo4j_ObjectDataProvider.getAllChildrenOfLearningObject(this.objectID);
+	}
+	
+	public List<LA_Activity> getActivitiesOfLearningObject() {
+		return Neo4j_ObjectDataProvider.getActivitiesOfLearningObject(this.objectID);
 	}
 }

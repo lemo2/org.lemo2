@@ -7,6 +7,7 @@ import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
+import org.lemo2.dataprovider.neo4j.Neo4j_ActivityDataProvider;
 import org.lemo2.dataprovider.neo4j.Neo4j_ContextDataProvider;
 
 public class Neo4j_Context implements LA_Context {
@@ -60,8 +61,7 @@ public class Neo4j_Context implements LA_Context {
 
 	@Override
 	public List<LA_Object> getAllObjects() {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ContextDataProvider.getAllLearningObjectsOfContext(this.contextID);
 	}
 
 	@Override
@@ -71,8 +71,7 @@ public class Neo4j_Context implements LA_Context {
 
 	@Override
 	public List<LA_Person> getAllStudents() {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ContextDataProvider.getAllStudentsOfContext(this.contextID);
 	}
 
 	@Override
@@ -82,46 +81,39 @@ public class Neo4j_Context implements LA_Context {
 
 	@Override
 	public List<LA_Person> getAllInstructors() {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ContextDataProvider.getAllInstructorsOfContext(this.contextID);
 	}
 
 	@Override
 	public List<LA_Activity> getActivities() {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ActivityDataProvider.getActivitiesOfContext(this);
 	}
 
 	@Override
 	public List<LA_Activity> getAllActivities() {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ActivityDataProvider.getAllActivitiesOfContext(this);
 	}
 
 	@Override
 	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj) {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ActivityDataProvider.getActivitiesOfContext(this, person, obj);
 	}
 
 	@Override
 	public List<LA_Activity> getAllActivities(LA_Person person, LA_Object obj) {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ActivityDataProvider.getAllActivitiesOfContext(this, person, obj);
 	}
 
 	@Override
 	public List<LA_Activity> getActivities(LA_Person person, LA_Object obj,
 			long start, long end) {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ActivityDataProvider.getActivitiesOfContext(this, person, obj, start, end);
 	}
 
 	@Override
 	public List<LA_Activity> getAllActivities(LA_Person person, LA_Object obj,
 			long start, long end) {
-		// TODO Auto-generated method stub
-		return null;
+		return Neo4j_ActivityDataProvider.getAllActivitiesOfContext(this, person, obj, start, end);
 	}
 
 }

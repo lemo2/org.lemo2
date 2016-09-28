@@ -1,8 +1,12 @@
 package org.lemo2.dataprovider.neo4j.domain;
 
+import java.util.List;
 import java.util.Set;
 
+import org.lemo2.dataprovider.api.LA_Activity;
+import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Person;
+import org.lemo2.dataprovider.neo4j.Neo4j_PersonDataProvider;
 
 public class Neo4j_Person implements LA_Person {
 
@@ -36,5 +40,13 @@ public class Neo4j_Person implements LA_Person {
 	public String getExtAttribute(String attr) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public List<LA_Activity> getActivitiesOfPerson() {
+		return Neo4j_PersonDataProvider.getActivitiesOfPerson(this.personID);
+	}
+	
+	public List<LA_Context> getContextsOfPerson() {
+		return Neo4j_PersonDataProvider.getContextsOfPerson(this.personID);
 	}
 }

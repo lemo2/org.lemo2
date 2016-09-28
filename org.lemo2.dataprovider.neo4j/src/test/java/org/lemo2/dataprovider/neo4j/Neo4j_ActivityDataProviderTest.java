@@ -21,9 +21,13 @@ public class Neo4j_ActivityDataProviderTest {
 	LA_Person person;
 	LA_Object obj;
 	
-	@Before
-	public void setUp() {
+	@Test
+	public void getActionOfActivity() {
+		String activityID = "1";
 		
+		String action = Neo4j_ActivityDataProvider.getActionOfActivity(activityID);
+		
+		assertEquals("Record_progress", action);
 	}
 	
 	@Test
@@ -76,15 +80,6 @@ public class Neo4j_ActivityDataProviderTest {
 		
 		assertEquals(397781, activities.size());
 	}
-	
-	@Test
-	public void getAllActivitiesOfContext() {
-		context = new Neo4j_Context("182");
-		
-		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getAllActivitiesOfContext(context);
-		
-		assertEquals(397781, activities.size());
-	}
 
 	@Test
 	public void getActivitiesOfContext_Parameters_ContextAndPerson() {
@@ -115,5 +110,25 @@ public class Neo4j_ActivityDataProviderTest {
 		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context, person, null);
 		
 		assertEquals(8, activities.size());
+	}
+	
+	@Test
+	public void getAllActivitiesOfContext_Parameters_Context() {
+		context = new Neo4j_Context("182");
+		
+		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getAllActivitiesOfContext(context);
+		
+		assertEquals(397781, activities.size());
+	}
+	
+	@Test
+	public void getAllActivitiesOfContext_Parameters_ContextAndPersonAndLearningObject() {
+		context = new Neo4j_Context("74");
+		person = new Neo4j_Person("2740");
+		obj = new Neo4j_Object("107744");
+		
+		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getAllActivitiesOfContext(context, person, obj);
+		
+		assertEquals(1848, activities.size());
 	}
 }

@@ -16,7 +16,7 @@ import org.neo4j.driver.v1.StatementResult;
 
 public class Neo4j_ContextDataProvider {
 	
-	public static Neo4j_Context getParentOfContext(String contextID) {
+	public static LA_Context getParentOfContext(String contextID) {
 		Neo4j_Context parent = null;
 		
 		Driver driver = Neo4j_Connector.getDriver();

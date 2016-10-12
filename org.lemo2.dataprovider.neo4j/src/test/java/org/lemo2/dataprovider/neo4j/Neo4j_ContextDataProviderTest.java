@@ -2,35 +2,44 @@ package org.lemo2.dataprovider.neo4j;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Person;
 import org.lemo2.dataprovider.neo4j.domain.Neo4j_Context;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
 
 public class Neo4j_ContextDataProviderTest {
 	
+	@Before
+	public void setUp() {
+		Driver driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "test" ) );
+		Neo4j_Connector.setDriver(driver);
+	}
+	
 	@Test
 	public void getParentOfContext_parentExists() {
-		String contextID = "14";
+		String contextID = "TestContext_2";
 		Neo4j_Context parent = (Neo4j_Context) Neo4j_ContextDataProvider.getParentOfContext(contextID);
 		
-		assertEquals("1", parent.getContextID());
+		assertEquals("TestContext_1", parent.getContextID());
 	}
 	
 	@Test
 	public void getChildrenOfContext_childrenExists() {
-		String contextID = "1";
+		String contextID = "TestContext_1";
 		List<LA_Context> children = Neo4j_ContextDataProvider.getChildrenOfContext(contextID);
 		
-		assertEquals(17, children.size());
+		assertEquals(2, children.size());
 	}
 	
 	@Test
 	public void getChildrenOfContext_noChildrenExists_ReturnEmptyList() {
-		String contextID = "TEST_ID";
+		String contextID = "TestContext_5";
 		List<LA_Context> children = Neo4j_ContextDataProvider.getChildrenOfContext(contextID);
 		
 		assertEquals(0, children.size());
@@ -38,10 +47,10 @@ public class Neo4j_ContextDataProviderTest {
 	
 	@Test
 	public void getAllChildrenOfContext() {
-		String contextID = "2";
+		String contextID = "TestContext_1";
 		List<LA_Context> children = Neo4j_ContextDataProvider.getAllChildrenOfContext(contextID);
 		
-		assertEquals(64, children.size());
+		assertEquals(5, children.size());
 	}
 	
 	@Test

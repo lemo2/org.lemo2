@@ -18,12 +18,12 @@ import org.lemo2.dataprovider.mongodb.domain.MongoDB_Context;
 public class MongoDB_ContextTest {
 
 	private static MongoDB_DataProvider dataProvider;
-	private static final int STORYTELLING_CONTEXT_ID = 206;
+	private static final int STORYTELLING_CONTEXT_ID = 2;
 	private static final int PYTHAGORAS_CONTEXT_ID = 21210;
 	
 	@BeforeClass
 	public static void setUp() throws Exception {
-		String database = "iversity";
+		String database = "iversity_rh";
 		String host = "localhost";
 		int port = 27017;
 		
@@ -38,8 +38,8 @@ public class MongoDB_ContextTest {
 		MongoDB_ObjectDataProvider.clearInitializedLearningObjects();
 	}
 	
-	@Test
-	public void getChildrenTreeActivitiesTest() {
+	//@Test
+	public void getAllActivitiesOfContextTest() {
 		clearData();
 		
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
@@ -64,7 +64,7 @@ public class MongoDB_ContextTest {
 				+ " activities");
 	}
 	
-	@Test
+	//@Test
 	public void getAllContextActivitiesTest() {
 		clearData();
 		
@@ -82,8 +82,8 @@ public class MongoDB_ContextTest {
 				+ " activities");
 	}
 	
-	@Test
-	public void getChildrenTreeTest() {
+	//@Test
+	public void getContextChildrenTest() {
 		clearData();
 		
 		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID); 
@@ -143,7 +143,7 @@ public class MongoDB_ContextTest {
 				MongoDB_ContextDataProvider.getSizeOfInitializedContexts());
 	}
 	
-	@Test
+	//@Test
 	public void getActivitiesOfAllContextsTest() {
 		clearData();
 		
@@ -229,25 +229,7 @@ public class MongoDB_ContextTest {
 				"' : " + secDuration + " ms");
 	}
 	
-	@Test
-	public void getPersonsOfCourseTest() {
-		clearData();
-		
-		MongoDB_Context context = (MongoDB_Context) MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID);
-		long start = System.currentTimeMillis();
-		List<LA_Person> students = context.getStudents();
-
-		long end = System.currentTimeMillis();
-		long duration = end - start;
-		long secDuration = TimeUnit.MILLISECONDS.toMillis(duration);
-		
-		System.out.println("-----------------------------------------");
-		System.out.println("Context '" + context.getName() + "' size students: " + students.size());
-		System.out.println("Duration - get students for course '" + context.getName() +
-				"' : " + secDuration + " ms");
-	}
-	
-	@Test
+	//@Test
 	public void getInstructorsOfCourseTest() {
 		clearData();
 		

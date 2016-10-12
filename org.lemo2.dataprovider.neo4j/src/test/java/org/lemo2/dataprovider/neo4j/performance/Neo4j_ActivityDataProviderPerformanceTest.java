@@ -1,4 +1,4 @@
-package org.lemo2.dataprovider.neo4j;
+package org.lemo2.dataprovider.neo4j.performance;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +10,8 @@ import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
 import org.lemo2.dataprovider.api.LA_Object;
 import org.lemo2.dataprovider.api.LA_Person;
+import org.lemo2.dataprovider.neo4j.Neo4j_ActivityDataProvider;
+import org.lemo2.dataprovider.neo4j.Neo4j_Connector;
 import org.lemo2.dataprovider.neo4j.domain.Neo4j_Activity;
 import org.lemo2.dataprovider.neo4j.domain.Neo4j_Context;
 import org.lemo2.dataprovider.neo4j.domain.Neo4j_Object;
@@ -18,7 +20,7 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 
-public class Neo4j_ActivityDataProviderTest {
+public class Neo4j_ActivityDataProviderPerformanceTest {
 
 	LA_Context context;
 	LA_Person person;
@@ -26,7 +28,7 @@ public class Neo4j_ActivityDataProviderTest {
 	
 	@Before
 	public void setUp() {
-		Driver driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "test" ) );
+		Driver driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "!!12L3m0" ) );
 		Neo4j_Connector.setDriver(driver);
 	}
 	
@@ -74,15 +76,6 @@ public class Neo4j_ActivityDataProviderTest {
 	
 	@Test
 	public void getActivitiesOfContext_Parameters_Context() {
-		context = new Neo4j_Context("TestContext_1");
-		
-		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context);
-		
-		assertEquals(6297, activities.size());
-	}
-	
-	@Test
-	public void getActivitiesOfContext_Parameters_Context2() {
 		context = new Neo4j_Context("182");
 		
 		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context);
@@ -92,42 +85,33 @@ public class Neo4j_ActivityDataProviderTest {
 
 	@Test
 	public void getActivitiesOfContext_Parameters_ContextAndPerson() {
-		context = new Neo4j_Context("TestContext_1");
-		person = new Neo4j_Person("Person_Student_1");
+		context = new Neo4j_Context("74");
+		person = new Neo4j_Person("2740");
 		
 		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context, person);
 		
-		assertEquals(4830, activities.size());
+		assertEquals(1848, activities.size());
 	}
 	
 	@Test
 	public void getActivitiesOfContext_Parameters_ContextAndPersonAndObject() {
-		context = new Neo4j_Context("TestContext_1");
-		person = new Neo4j_Person("Person_Student_1");
-		obj = new Neo4j_Object("TestObject_1");
+		context = new Neo4j_Context("74");
+		person = new Neo4j_Person("2740");
+		obj = new Neo4j_Object("107744");
 		
 		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context, person, obj);
 		
-		assertEquals(8, activities.size());
+		assertEquals(1848, activities.size());
 	}
 
 	@Test
 	public void getActivitiesOfContext_Parameters_ContextAndPersonAndNullObject() {
-		context = new Neo4j_Context("TestContext_1");
-		person = new Neo4j_Person("Person_Student_1");
+		context = new Neo4j_Context("74");
+		person = new Neo4j_Person("2740");
 		
 		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getActivitiesOfContext(context, person, null);
 		
-		assertEquals(8, activities.size());
-	}
-	
-	@Test
-	public void getAllActivitiesOfContext_Parameters_Context() {
-		context = new Neo4j_Context("182");
-		
-		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getAllActivitiesOfContext(context);
-		
-		assertEquals(397781, activities.size());
+		assertEquals(1848, activities.size());
 	}
 	
 	@Test
@@ -139,5 +123,14 @@ public class Neo4j_ActivityDataProviderTest {
 		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getAllActivitiesOfContext(context, person, obj);
 		
 		assertEquals(1848, activities.size());
+	}
+	
+	//@Test
+	public void getAllActivitiesOfContext_Parameters_Context() {
+		context = new Neo4j_Context("2");
+		
+		List<LA_Activity> activities = Neo4j_ActivityDataProvider.getAllActivitiesOfContext(context);
+		
+		assertEquals(5060767, activities.size());
 	}
 }

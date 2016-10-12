@@ -16,13 +16,13 @@ public class MongoDB_ActivityTest {
 
 	private static MongoDB_DataProvider dataProvider;
 	
-	private int STORYTELLING_CONTEXT_ID = 206;
+	private int STORYTELLING_CONTEXT_ID = 182;
 	private int objectID = 142423;
 	private int personID = 287630;
 	
 	@BeforeClass
 	public static void setUp() throws Exception {
-		String database = "iversity";
+		String database = "iversity_rh";
 		String host = "localhost";
 		int port = 27017;
 		
@@ -55,12 +55,12 @@ public class MongoDB_ActivityTest {
 		System.out.println("Seconds - get all activity IDs: " + secDuration + " ms");
 	}
 	
-	//@Test
+	@Test
 	public void getContextActivities() {
 		clearData();
 		
 		List<LA_Activity> activities = new ArrayList<LA_Activity>();
-		LA_Context context = MongoDB_ContextDataProvider.getContextByID(212741);
+		LA_Context context = MongoDB_ContextDataProvider.getContextByID(STORYTELLING_CONTEXT_ID);
 		
 		long start = System.currentTimeMillis();
 		

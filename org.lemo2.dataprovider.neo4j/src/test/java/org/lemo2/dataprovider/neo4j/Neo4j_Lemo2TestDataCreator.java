@@ -10,22 +10,20 @@ import org.neo4j.driver.v1.Session;
 
 public class Neo4j_Lemo2TestDataCreator {
 
-	int numberOfContexts = 5;
+	int numberOfContexts = 6;
 	int numberOfObjects = 5;
 	int numberOfStudents = 15;
 	int numberOfInstructors = 2;
 	int numberOfActivities = 50;
 	
-	public void createTestDatabase() {
+	public void removeTestdata() {
+		String statement = "MATCH (n) DETACH DELETE n";
 		
-	}
-	
-	public void removeTestDatabase() {
+		Driver driver = getDriverForTestDatabase();
+		Session session = driver.session();
 		
-	}
-	
-	public void startNeo4j(String databaseName) {
-		
+		session.run(statement);
+		session.close();
 	}
 	
 	public void createTestdata() {
@@ -65,9 +63,11 @@ public class Neo4j_Lemo2TestDataCreator {
 		
 		List<String> statements = new ArrayList<String>();
 		
-		for (int i = 1; i <= numberOfObjects; i++) {
-			statements.add("CREATE (o:LearningObject {objectID:'TestObject_" + i + "'})");
-		}
+		statements.add("CREATE (o:LearningObject:Exam {objectID:'TestObject_1'})");
+		statements.add("CREATE (o:LearningObject:Question {objectID:'TestObject_2'})");
+		statements.add("CREATE (o:LearningObject:Question {objectID:'TestObject_3'})");
+		statements.add("CREATE (o:LearningObject:Question {objectID:'TestObject_4'})");
+		statements.add("CREATE (o:LearningObject:Video {objectID:'TestObject_5'})");
 		
 		for (int i = 0; i < statements.size(); i++) {
 			session.run(statements.get(i));
@@ -118,23 +118,25 @@ public class Neo4j_Lemo2TestDataCreator {
 		createLearningContextRelationships();
 		createLearningObjectRelationships();
 		createPersonRelationships();
+		createLearningActivityRelationships();
 	}
 	
 	private void createLearningContextRelationships() {
 		Driver driver = getDriverForTestDatabase();
 		Session session = driver.session();
 		
-		session.run("(:LearningContext {contextID: 'TestContext_1'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_2'})");
-		session.run("(:LearningContext {contextID: 'TestContext_1'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_3'})");
-		session.run("(:LearningContext {contextID: 'TestContext_4'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_5'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_1'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_2'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_1'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_3'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_3'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_4'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_4'})-[:PARENT_OF]->(:LearningContext {contextID:'TestContext_5'})");
 		
-		session.run("(:LearningContext {contextID: 'TestContext_2'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_1'})");
-		session.run("(:LearningContext {contextID: 'TestContext_2'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_2'})");
-		session.run("(:LearningContext {contextID: 'TestContext_3'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_1'})");
-		session.run("(:LearningContext {contextID: 'TestContext_3'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_2'})");
-		session.run("(:LearningContext {contextID: 'TestContext_3'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_3'})");
-		session.run("(:LearningContext {contextID: 'TestContext_5'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_4'})");
-		session.run("(:LearningContext {contextID: 'TestContext_5'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_5'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_2'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_1'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_2'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_2'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_3'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_1'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_3'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_2'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_3'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_3'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_5'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_4'})");
+		session.run("CREATE (:LearningContext {contextID: 'TestContext_5'})-[:HAS_OBJECT]->(:LearningObject {contextID:'TestObject_5'})");
 		
 		session.close();
 	}
@@ -143,9 +145,9 @@ public class Neo4j_Lemo2TestDataCreator {
 		Driver driver = getDriverForTestDatabase();
 		Session session = driver.session();
 		
-		session.run("(:LearningObject {contextID: 'TestObject_1'})-[:PARENT_OF]->(:LearningObject {contextID:'TestObject_2'})");
-		session.run("(:LearningObject {contextID: 'TestObject_1'})-[:PARENT_OF]->(:LearningObject {contextID:'TestObject_3'})");
-		session.run("(:LearningObject {contextID: 'TestObject_4'})-[:PARENT_OF]->(:LearningObject {contextID:'TestObject_5'})");
+		session.run("CREATE (:LearningObject {contextID: 'TestObject_1'})-[:PARENT_OF]->(:LearningObject {contextID:'TestObject_2'})");
+		session.run("CREATE (:LearningObject {contextID: 'TestObject_2'})-[:PARENT_OF]->(:LearningObject {contextID:'TestObject_3'})");
+		session.run("CREATE (:LearningObject {contextID: 'TestObject_4'})-[:PARENT_OF]->(:LearningObject {contextID:'TestObject_5'})");
 		
 		session.close();
 	}
@@ -154,19 +156,28 @@ public class Neo4j_Lemo2TestDataCreator {
 		Driver driver = getDriverForTestDatabase();
 		Session session = driver.session();
 		
-		session.run("(:Person {personID: 'Person_Instructor_1'})-[:PARTICIPATES_IN {role:'instructor'}]->"+
+		session.run("CREATE (:Person {personID: 'Person_Instructor_1'})-[:PARTICIPATES_IN {role:'Instructor'}]->"+
 				"(:LearningContext {contextID:'TestContext_1'})");
-		session.run("(:Person {personID: 'Person_Instructor_2'})-[:PARTICIPATES_IN {role:'instructor'}]->"+
+		session.run("CREATE (:LearningContext {contextID:'TestContext_1'})-[:HAS_PERSON {role:'Instructor'}]->"+
+				"(:Person {personID: 'Person_Instructor_1'})");
+		
+		session.run("CREATE (:Person {personID: 'Person_Instructor_2'})-[:PARTICIPATES_IN {role:'Instructor'}]->"+
 				"(:LearningContext {contextID:'TestContext_4'})");
+		session.run("CREATE (:LearningContext {contextID:'TestContext_4'})-[:HAS_PERSON {role:'Instructor'}]->"+
+				"(:Person {personID: 'Person_Instructor_2'})");
 		
 		for (int i = 1; i <= 10; i++) {
-			session.run("(:Person {personID: 'Person_Student_" + i + "'})-[:PARTICIPATES_IN {role:'student'}]->"+
+			session.run("CREATE (:Person {personID: 'Person_Student_" + i + "'})-[:PARTICIPATES_IN {role:'Student'}]->"+
 					"(:LearningContext {contextID:'TestContext_1'})");
+			session.run("CREATE (:LearningContext {contextID:'TestContext_1'})-[:HAS_PERSON {role:'Student'}]->"+
+					"(:Person {personID: 'Person_Student_" + i + "'})");
 		}
 		
 		for (int i = 11; i <= 15; i++) {
-			session.run("(:Person {personID: 'Person_Student_" + i + "'})-[:PARTICIPATES_IN {role:'student'}]->"+
+			session.run("CREATE (:Person {personID: 'Person_Student_" + i + "'})-[:PARTICIPATES_IN {role:'Student'}]->"+
 					"(:LearningContext {contextID:'TestContext_4'})");
+			session.run("CREATE (:LearningContext {contextID:'TestContext_4'})-[:HAS_PERSON {role:'Student'}]->"+
+					"(:Person {personID: 'Person_Student_" + i + "'})");
 		}
 		
 		session.close();
@@ -176,17 +187,75 @@ public class Neo4j_Lemo2TestDataCreator {
 		Driver driver = getDriverForTestDatabase();
 		Session session = driver.session();
 		
+		// HAS_ACTIVITY
+		for (int i = 1; i <= 10; i++) {
+			session.run("CREATE (:LearningContext {contextID: 'TestContext_2'})-[:HAS_ACTIVITY]->" + 
+					"(:LearningActivity {activityID:'Activity_" + i + "'})");
+		}
+		for (int i = 11; i <= 25; i++) {
+			session.run("CREATE (:LearningContext {contextID: 'TestContext_3'})-[:HAS_ACTIVITY]->" + 
+					"(:LearningActivity {activityID:'Activity_" + i + "'})");
+		}
+		for (int i = 26; i <= numberOfActivities; i++) {
+			session.run("CREATE (:LearningContext {contextID: 'TestContext_5'})-[:HAS_ACTIVITY]->" + 
+					"(:LearningActivity {activityID:'Activity_" + i + "'})");
+		}
+		
 		// USES
+		for (int i = 6; i <= 10; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:USE]->" + 
+					"(:LearningObject {objectID: 'TestObject_2'})");
+		}
+		for (int i = 11; i <= 20; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:USE]->" + 
+					"(:LearningObject {objectID: 'TestObject_3'})");
+		}
+		for (int i = 26; i <= 40; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:USE]->" + 
+					"(:LearningObject {objectID: 'TestObject_4'})");
+		}
+		for (int i = 41; i <= numberOfActivities; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:USE]->" + 
+					"(:LearningObject {objectID: 'TestObject_5'})");
+		}
 		
 		// REFERENCES
+		for (int i = 2; i <= 6; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_1'})");
+		}
+		for (int i = 7; i <= 10; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_6'})");
+		}
 		
+		for (int i = 12; i <= 19; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_11'})");
+		}
+		for (int i = 21; i <= 25; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_20'})");
+		}
+		
+		for (int i = 27; i <= 30; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_26'})");
+		}
+		for (int i = 31; i <= 45; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_30'})");
+		}
+		for (int i = 46; i <= numberOfActivities; i++) {
+			session.run("CREATE (:LearningActivity {activityID:'Activity_" + i + "'})-[:REFERENCES]->" + 
+					"(:LearningActivity {activityID:'Activity_45'})");
+		}
 		
 		session.close();
 	}
 	
 	private Driver getDriverForTestDatabase() {
-		Driver driver = GraphDatabase.driver( "bolt://localhost", AuthTokens.basic( "neo4j", "JUnitTestPW" ) );
-		
+		Driver driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "test" ) );
 		return driver;
 	}
 }

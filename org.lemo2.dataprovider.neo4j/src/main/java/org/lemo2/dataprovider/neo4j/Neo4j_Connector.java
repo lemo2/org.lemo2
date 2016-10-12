@@ -2,29 +2,45 @@ package org.lemo2.dataprovider.neo4j;
 
 import java.io.File;
 
+import org.neo4j.driver.v1.AuthToken;
 import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.test.TestGraphDatabaseFactory;
 
 public class Neo4j_Connector {
 
 	private static File DB_PATH;
-	private GraphDatabaseService graphDB;
+	private static GraphDatabaseService graphDB;
 	
-	public Neo4j_Connector(String host, String databaseName, int databasePort) {
+	private static Driver driver;
+	
+	public static void createImpermanentDatabase() {
+		graphDB = new TestGraphDatabaseFactory().newImpermanentDatabase();
+		registerShutdownHook(graphDB);
+	}
+	
+	public static GraphDatabaseService getGraphdatabase() {
+		return graphDB;
+	}
+	
+	public static GraphDatabaseService createEmbeddedDatabase(String databasePath) {
 		
+		if (graphDB == null) {
+			GraphDatabaseFactory dbFactory = new GraphDatabaseFactory();
+			DB_PATH = new File(databasePath);
+			graphDB = dbFactory.newEmbeddedDatabase(DB_PATH);
+			registerShutdownHook(graphDB);
+		}
+		
+		return graphDB;
 	}
 	
-	public Neo4j_Connector(String host, String databaseName, int databasePort, String configPath) {
-		Node node;
-	}
-	
-	private void connectToDatabase(String databasePath) throws Exception {
-		DB_PATH = new File(databasePath);
-		graphDB = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+	public static void shutdownEmbeddedDatabase() {
+		graphDB.shutdown();
 	}
 	
 	private static void registerShutdownHook( final GraphDatabaseService graphDb )
@@ -43,10 +59,27 @@ public class Neo4j_Connector {
 	}
 	
 	public static Driver getDriver() {
-		
-		Driver driver = GraphDatabase.driver( "bolt://localhost", AuthTokens.basic( "neo4j", "!!12L3m0" ) );
-		
+		if (driver == null) {
+			return getDefaultDriver();
+		}
 		return driver;
+	}
+	
+	private static Driver getDefaultDriver() {
+		Driver driver = GraphDatabase.driver( "bolt://localhost", AuthTokens.basic( "neo4j", "neo4j" ) );
+		return driver;
+	}
+	
+	public static void setDriver(String boltURL, AuthToken authToken) {
+		driver = GraphDatabase.driver(boltURL, authToken);
+	}
+	
+	public static void setDriver(String boltURL, Config config) {
+		driver = GraphDatabase.driver(boltURL, config);
+	}
+	
+	public static void setDriver(Driver drv) {
+		driver = drv;
 	}
 
 }

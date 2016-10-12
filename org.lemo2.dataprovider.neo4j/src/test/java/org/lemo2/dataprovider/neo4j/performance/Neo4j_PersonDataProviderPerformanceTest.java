@@ -1,4 +1,4 @@
-package org.lemo2.dataprovider.neo4j;
+package org.lemo2.dataprovider.neo4j.performance;
 
 import static org.junit.Assert.*;
 
@@ -8,15 +8,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.lemo2.dataprovider.api.LA_Activity;
 import org.lemo2.dataprovider.api.LA_Context;
+import org.lemo2.dataprovider.neo4j.Neo4j_Connector;
+import org.lemo2.dataprovider.neo4j.Neo4j_PersonDataProvider;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 
-public class Neo4j_PersonDataProviderTest {
+public class Neo4j_PersonDataProviderPerformanceTest {
 
 	@Before
 	public void setUp() {
-		Driver driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "test" ) );
+		Driver driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "!!12L3m0" ) );
 		Neo4j_Connector.setDriver(driver);
 	}
 	

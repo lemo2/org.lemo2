@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
 	Neo4j_ActivityDataProviderTest.class,
 	Neo4j_ContextDataProviderTest.class,
-	Neo4j_PersonDataProviderTest.class
+	Neo4j_PersonDataProviderTest.class,
+	Neo4j_ObjectDataProviderTest.class
 })
 
 public class Neo4j_Lemo2TestSuite {

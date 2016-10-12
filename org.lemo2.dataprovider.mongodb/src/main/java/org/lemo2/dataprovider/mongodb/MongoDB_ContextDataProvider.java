@@ -267,7 +267,7 @@ public class MongoDB_ContextDataProvider {
 			// get person ids
 			for (DBObject dbObj : personsResult) {
 				String role = (String) dbObj.get("role");
-				if (role.equals("student")) {
+				if (role.equals("student") || role.equals("4")) {
 					int pID = (int) dbObj.get("person_id");
 					personIDs.add(pID);
 				}
@@ -334,7 +334,7 @@ public class MongoDB_ContextDataProvider {
 			// get person ids
 			for (DBObject dbObj : personsResult) {
 				String role = (String) dbObj.get("role");
-				if (role.equals("instructor")) {
+				if (role.equals("instructor") || role.equals("2")) {
 					int pID = (int) dbObj.get("person_id");
 					personIDs.add(pID);
 				}

@@ -40,7 +40,7 @@ public class Neo4j_ActivityDataProvider {
 		String statement = "MATCH (context:LearningContext) " +
 				"WHERE context.contextID = '" + nContext.getContextID() + "' " +
 				"WITH context " +
-				"MATCH (context)-[r:HAS_ACTIVITY*1..]->(activity:LearningActivity) " +
+				"MATCH (context)-[:PARENT_OF*1..]->()-[r:HAS_ACTIVITY]->(activity:LearningActivity) " +
 				"RETURN activity.activityID";
 		
 		StatementResult result = session.run(statement);
@@ -79,7 +79,7 @@ public class Neo4j_ActivityDataProvider {
 		String statement = "MATCH (person:Person)-[d:DOES]->(activity:LearningActivity) " +
 				"WHERE person.personID = '" + nPerson.getPersonID() + "' " +
 				"WITH activity " + 
-				"MATCH(lObject:LearningObject)<-[:USES]-(activity)<-[:HAS_ACTIVITY]-(context:LearningContext) " +
+				"MATCH(lObject:LearningObject)<-[:USES]-(activity)<-[:HAS_ACTIVITY*1..]-(context:LearningContext) " +
 				"WHERE lObject.objectID = '" + nObj.getObjectID() + "' " +
 				"AND context.contextID = '" + nContext.getContextID() + "' " +
 				"WITH activity RETURN activity.activityID";
@@ -122,7 +122,7 @@ public class Neo4j_ActivityDataProvider {
 				"WHERE person.personID = '" + nPerson.getPersonID() + "' " +
 				"d.time >= " + start + " AND d.time <= " + end +
 				"WITH activity " + 
-				"MATCH(lObject:LearningObject)<-[:USES]-(activity)<-[:HAS_ACTIVITY]-(context:LearningContext) " +
+				"MATCH(lObject:LearningObject)<-[:USES]-(activity)<-[:HAS_ACTIVITY*1..]-(context:LearningContext) " +
 				"WHERE lObject.objectID = '" + nObj.getObjectID() + "' " +
 				"AND context.contextID = '" + nContext.getContextID() + "' " +
 				"WITH activity RETURN activity.activityID";
@@ -200,9 +200,9 @@ public class Neo4j_ActivityDataProvider {
 			String statement = "MATCH (context:LearningContext) " +
 					"WHERE context.contextID = '" + nContext.getContextID() + "' " +
 					"WITH context " +
-					"MATCH (person:Person {personID:'" + nPerson.getPersonID() + "'})" +
-					"WITH person " +
-					"MATCH (person)-[:DOES]->(activity:LearningActivity)" +
+					"MATCH (person:Person {personID:'" + nPerson.getPersonID() + "'}) " +
+					"WITH context, person " +
+					"MATCH (person)-[:DOES]->(activity:LearningActivity)<-[:HAS_ACTIVITY]-(context) " +
 					"RETURN activity.activityID";
 
 			StatementResult result = session.run(statement);
@@ -260,7 +260,7 @@ public class Neo4j_ActivityDataProvider {
 					"WITH person " +
 					"MATCH (person)-[:DOES]->(activity:LearningActivity) " +
 					"WITH activity " +
-					"MATCH (activity)-[:REFERENCES]->(:LearningObject {objectID:'" + nObject.getObjectID() + "'}) " +
+					"MATCH (activity)-[:USES]->(:LearningObject {objectID:'" + nObject.getObjectID() + "'}) " +
 					"RETURN activity.activityID";
 			
 			StatementResult result = session.run(statement);

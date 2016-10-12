@@ -8,8 +8,9 @@ public class Neo4j_Lemo2TestRunner {
 
 	public static void main(String[] args) {
 		Neo4j_Lemo2TestDataCreator dataCreator = new Neo4j_Lemo2TestDataCreator();
-		//dataCreator.createTestdata();
-		
+		dataCreator.removeTestdata();
+		dataCreator.createTestdata();
+		/*
 		Result result = JUnitCore.runClasses(Neo4j_Lemo2TestSuite.class);
 
 	      for (Failure failure : result.getFailures()) {
@@ -22,7 +23,9 @@ public class Neo4j_Lemo2TestRunner {
 	      else {
 	    	  System.out.println("Testsuite completed with errors.");
 	      }
-
+	      
+	    dataCreator.removeTestdata();
+		*/
 	}
 
 }
